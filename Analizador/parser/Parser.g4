@@ -10,11 +10,14 @@ options {
     import "p1/packages/Analizador/ast"
     import "p1/packages/Analizador/ast/interfaces"
     import "p1/packages/Analizador/ast/expresion" // id, operacion, primitivo
+    import "p1/packages/Analizador/ast/expresion/Accesos" // AccesoArreglo, AccesoObjeto
     import "p1/packages/Analizador/ast/expresion2" // Llamada
-    import "p1/packages/Analizador/ast/instrucciones" // print, declaracion
+    import "p1/packages/Analizador/ast/instrucciones" // print, declaracion, asignación
+    import "p1/packages/Analizador/ast/asignacion" // asignación
+    import "p1/packages/Analizador/ast/instrucciones/Definicion" // DefinicionArreglo, DefinicionObjeto
     import "p1/packages/Analizador/ast/instrucciones/SentenciasTransferencia"
     import "p1/packages/Analizador/ast/instrucciones/SentenciasControl"
-    import "p1/packages/Analizador/ast/instrucciones/SentenciasCiclicas"
+    //import "p1/packages/Analizador/ast/instrucciones/SentenciasCiclicas"
     import "p1/packages/Analizador/entorno"
     import "p1/packages/Analizador/entorno/Simbolos"
     import arrayList "github.com/colegno/arraylist"
@@ -64,9 +67,11 @@ $lista =  arrayList.New()
     : sublista = parametros ','  tiposvars ID                     {
                                                                     listaIdes := arrayList.New()
                                                                     listaIdes.Add(expresion.NuevoIdentificador($ID.text))
+
                                                                     decl := instrucciones.NuevaDeclaracion(listaIdes, $tiposvars.tipo)
                                                                     $sublista.lista.Add( decl )
                                                                     $lista =  $sublista.lista
+
                                                                  }
     | tiposvars ID                                               {
                                                                     listaIdes := arrayList.New()
@@ -79,7 +84,7 @@ $lista =  arrayList.New()
 
 funcmain returns[interfaces.Instruccion instr]
 @init{ listaParams:= arrayList.New() }
-    : PUBLIC STATIC VOIDTYPE MAIN '(' STRINGARGS ARGS '[' ']' ')' bloque
+    : MAIN '(' ')' bloque
     { $instr = Simbolos.NuevoFuncion("main",listaParams,$bloque.lista,entorno.VOID)}
 ;
 
@@ -97,7 +102,7 @@ instrucciones returns [*arrayList.List lista]
                                                                         for _, e := range listInt {
                                                                           $lista.Add(e.GetInstr())
                                                                         }
-                                                                    fmt.Printf("tipo %T",localctx.(*InstruccionesContext).GetE())
+                                                                    fmt.Printf("\ntipo %T",localctx.(*InstruccionesContext).GetE())
                                                                 }
 
 ;
@@ -109,34 +114,55 @@ instruccion returns [interfaces.Instruccion instr]
   | declaracion                              ';'                {$instr = $declaracion.instr}
   | llamada                                  ';'                {$instr = $llamada.instr}
   | retorno                                  ';'                {$instr = $retorno.instr}
+  | dec_arr                                  ';'                {$instr = $dec_arr.instr}
+  | dec_objeto                               ';'                {$instr = $dec_objeto.instr}
+  | asignacion                               ';'                {$instr = $asignacion.instr}
 ;
 
 
+// SECCIón ASIGNACIóN
+
+asignacion returns[interfaces.Instruccion instr]
+    : ID '=' expression {
+            linea := localctx.(*AsignacionContext).Get_expression().GetStart().GetLine()
+            columna := localctx.(*AsignacionContext).Get_expression().GetStart().GetColumn()
+            $instr = asignacion.NuevaAsignacion($ID.text, $expression.expr, linea, columna)
+        }
+;
+
+// Sección If
+
 if_instr  returns [interfaces.Instruccion instr]
-    : IF_TOK LP expression RP bloque                                        {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
-    | IF_TOK LP expression RP bprincipal = bloque ELSE  belse = bloque      {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,nil,$belse.lista)}
+    : IF_TOK LP expression RP bloque                                        {
+        $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)
+    }
+    | IF_TOK LP expression RP bprincipal = bloque ELSE  belse = bloque      {
+        $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,nil,$belse.lista)
+    }
     | IF_TOK LP expression RP bprincipal = bloque listaelseif ELSE  belse = bloque {
         $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,$listaelseif.lista,$belse.lista)
     }
 ;
 
 listaelseif returns [*arrayList.List lista]
-@init{ $lista = arrayList.New()}
+@init{ $lista = arrayList.New()} // Se inicializa la lista que servirá de recolector de no terminales "else_if"
 : list += else_if+ {
-                                                                            listInt := localctx.(*ListaelseifContext).GetList()
-                                                                            for _, e := range listInt {
-                                                                                $lista.Add(e.GetInstr())
-                                                                            }
+    listInt := localctx.(*ListaelseifContext).GetList()
+    for _, e := range listInt {
+        $lista.Add(e.GetInstr())
     }
+} // Como la producción retorna una lista de contexto, se llena una lista de instrucciones para mejor manejo.
 ;
 
 else_if returns [interfaces.Instruccion instr]
-    : ELSE IF_TOK LP expression RP bloque                               {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
+    : ELSE IF_TOK LP expression RP bloque   {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
 ;
 
 
+// Seicción Print
+
 consola returns [interfaces.Instruccion instr]
-    : SYSTEM '.' OUT '.' PRINTLN LP expression RP                    {$instr = instrucciones.NuevoImprimir($expression.expr)}
+    : PRINTLN LP expression RP   {$instr = instrucciones.NuevoImprimir($expression.expr)}
 ;
 
 
@@ -167,8 +193,25 @@ listaExpresiones returns [*arrayList.List lista]
 ;
 
 declaracionIni returns [interfaces.Instruccion instr]
-    : tiposvars listides '=' expression                              {
-                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr)
+    : LET listides '=' expression                                    {
+                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista, entorno.NULL,$expression.expr, false, linea, columna)
+                                                                     }
+    | LET listides DOSPUNTOS tiposvars '=' expression                {
+                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, false, linea, columna)
+                                                                     }
+    | LET MUT listides   '=' expression                              {
+                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista, entorno.NULL,$expression.expr, true, linea, columna)
+                                                                     }
+    | LET MUT listides DOSPUNTOS tiposvars  '=' expression           {
+                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, true, linea, columna)
                                                                      }
 ;
 
@@ -204,6 +247,88 @@ tiposvars returns[entorno.TipoDato tipo]
 ;
 
 
+//SECCIÓN ARREGLOS
+dec_arr returns [interfaces.Instruccion instr]
+    // int [][][] ejemplo = new int[5]
+    // las dimensiones son llaves cuadradas vacías
+    : tiposvars  dimensiones ID '=' expression                  {$instr = Definicion.NewDeclaracionArray($dimensiones.tam,$ID.text,$expression.expr,$tiposvars.tipo)}
+;
+
+
+dimensiones returns [int tam]
+@init{ $tam = 0}
+    :  tamano = dimensiones dimension                           {
+                                                                    $tam = $tamano.tam + 1
+                                                                 }
+    |  dimension                                                {$tam = 1}
+;
+
+dimension
+
+    : '[' ']'
+;
+
+
+
+arraydata returns [interfaces.Expresion expr]
+    : L_LLAVE listaExpresiones R_LLAVE                          {$expr = expresion2.NewValorArreglo($listaExpresiones.lista)}
+;
+
+instancia returns[interfaces.Expresion expr]
+        // new int [e][e][e]
+    : NEW_ tiposvars listanchos                                 {$expr = expresion2.NewInstanciaArreglo($tiposvars.tipo, $listanchos.lista )}
+;
+
+listanchos returns[*arrayList.List lista]
+@init{
+    $lista = arrayList.New()
+}
+    :  sublist = listanchos ancho                                          {
+                                                                                $sublist.lista.Add($ancho.expr)
+                                                                                $lista = $sublist.lista
+                                                                            }
+    |  ancho                                                                {$lista.Add($ancho.expr)}
+;
+
+ancho   returns [interfaces.Expresion expr]
+    :   '[' expression ']'                                                  {$expr = $expression.expr}
+;
+
+// SECCIÓN CLASES
+
+dec_objeto returns[interfaces.Instruccion instr]
+    : ID listides '=' expression                                {$instr = Definicion.NewDeclararObjeto( $ID.text, $listides.lista, $expression.expr)}
+;
+
+
+instanciaClase returns[interfaces.Expresion expr]
+    : NEW_ ID '(' ')'                                           {$expr = expresion2.NewInstanciaObjeto($ID.text )}
+;
+
+
+accesoarr returns[interfaces.Expresion expr]
+    : ID listanchos                                             {$expr = Accesos.NewAccessoArr($ID.text,$listanchos.lista)}
+;
+
+accesoObjeto returns[interfaces.Expresion expr]
+    :  listaAccesos                                             {$expr = Accesos.NewAccesoObjeto( $listaAccesos.lista)}
+;
+
+listaAccesos returns[*arrayList.List lista]
+@init{
+    $lista = arrayList.New()
+}
+    :  SUBLISTA =  listaAccesos '.' acceso       {
+                                                    $SUBLISTA.lista.Add( $acceso.expr)
+                                                    $lista = $SUBLISTA.lista
+                                                }
+    | acceso                                    {   $lista.Add($acceso.expr)}
+;
+
+acceso  returns [interfaces.Expresion expr]
+    : ID                                        { $expr = expresion.NuevoIdentificador($ID.text)}
+    | accesoarr                                 { $expr = $accesoarr.expr}
+;
 
 
 
@@ -219,11 +344,13 @@ tiposvars returns[entorno.TipoDato tipo]
 expression returns[interfaces.Expresion expr]
     : expr_rel                                                  {$expr = $expr_rel.expr}
     | expr_arit                                                 {$expr = $expr_arit.expr}
+    | instancia                                                 {$expr = $instancia.expr} // new int[4]
+    | arraydata                                                 {$expr = $arraydata.expr} // datos del arreglo
 
 ;
 
 expr_rel returns[interfaces.Expresion expr]
-    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR ) opDe = expr_rel {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false)}
+    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false)}
     | expr_arit  {$expr = $expr_arit.expr}
 ;
 
@@ -238,6 +365,9 @@ expr_arit returns[interfaces.Expresion expr]
 expr_valor returns[interfaces.Expresion expr]
   : primitivo                                                   {$expr = $primitivo.expr}
   | llamada                                                     {$expr = $llamada.expr}
+  | accesoarr                                                   {$expr = $accesoarr.expr}
+  | accesoObjeto                                                {$expr = $accesoObjeto.expr}
+
 ;
 
 primitivo returns[interfaces.Expresion expr]
@@ -263,7 +393,7 @@ primitivo returns[interfaces.Expresion expr]
 
     | ID                                                        { $expr = expresion.NuevoIdentificador($ID.text)}
 
-    | TRUE                                                      { $expr = expresion.NuevoPrimitivo(true,entorno.BOOLEAN)}
-    | FALSE                                                     { $expr = expresion.NuevoPrimitivo(false,entorno.BOOLEAN)}
+    | TRUE                                                      { $expr = expresion.NuevoPrimitivo(true,entorno.BOOLEAN) }
+    | FALSE                                                     { $expr = expresion.NuevoPrimitivo(false,entorno.BOOLEAN) }
 
 ;

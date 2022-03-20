@@ -39,7 +39,7 @@ func (l Llamada) ObtenerValor(ent entorno.Entorno) entorno.TipoRetorno {
 	val := clonFunc.Ejecutar(entFunc)
 
 	if (reflect.TypeOf(val) != reflect.TypeOf(entorno.TipoRetorno{})) {
-		return entorno.TipoRetorno{}
+		return entorno.TipoRetorno{ Valor: -1, Tipo: entorno.NULL }
 	}
 
 	return val.(entorno.TipoRetorno)

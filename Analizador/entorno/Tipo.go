@@ -7,9 +7,12 @@ const (
 	INTEGER TipoDato = iota
 	FLOAT
 	STRING
+	STRING2 // &str
 	BOOLEAN
 	NULL
 	VOID
+	ARREGLO
+	OBJETO
 )
 
 const (

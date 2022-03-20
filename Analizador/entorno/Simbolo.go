@@ -1,16 +1,25 @@
 package entorno
 
-import "github.com/colegno/arraylist"
+import (
+	"github.com/colegno/arraylist"
+)
+
+type SimboloAbstracto interface {
+	GetTipo() TipoDato
+}
 
 type Simbolo struct {
 	Linea         int
 	Columna       int
 	Identificador string
 	Valor         interface{}
+	EsReferencia  bool
+	Referencia    interface{}
 	Tipo          TipoDato
 	Constante     bool
 	EsFuncion     bool
 	ListaParams   *arraylist.List
+	EsMutable     bool
 }
 
 /**
@@ -23,7 +32,7 @@ type Simbolo struct {
 
 */
 
-func NuevoSimboloIdentificador(linea int, columna int, identificador string) *Simbolo {
+func NewSimboloIdentificador(linea int, columna int, identificador string) *Simbolo {
 	return &Simbolo{
 		Linea:         linea,
 		Columna:       columna,
@@ -31,10 +40,12 @@ func NuevoSimboloIdentificador(linea int, columna int, identificador string) *Si
 		Constante:     false,
 		EsFuncion:     false,
 		Valor:         nil,
+		EsReferencia:  false,
+		EsMutable:     true,
 	}
 }
 
-func NuevoSimboloIdentificadorValor(linea int, columna int, identificador string, valor interface{}, dato TipoDato) Simbolo {
+func NuevoSimboloIdentificadorValor(linea int, columna int, identificador string, valor interface{}, dato TipoDato, esMutable bool) Simbolo {
 	e := Simbolo{
 		Linea:         linea,
 		Columna:       columna,
@@ -43,6 +54,24 @@ func NuevoSimboloIdentificadorValor(linea int, columna int, identificador string
 		EsFuncion:     false,
 		Valor:         valor,
 		Tipo:          dato,
+		EsReferencia:  false,
+		EsMutable:     esMutable,
+	}
+	return e
+}
+
+func NewSimboloObjeto(linea int, columna int, identificador string, tipoRet TipoDato) Simbolo {
+	e := Simbolo{
+		Linea:         linea,
+		Columna:       columna,
+		Identificador: identificador,
+		Constante:     false,
+		EsFuncion:     true,
+		Valor:         nil,
+		Tipo:          tipoRet,
+		ListaParams:   nil,
+		EsReferencia:  false,
+		EsMutable:     true,
 	}
 	return e
 }
@@ -57,10 +86,11 @@ func NuevoSimboloFuncion(linea int, columna int, identificador string, tipoRet T
 		Valor:         nil,
 		Tipo:          tipoRet,
 		ListaParams:   listParametros,
+		EsReferencia:  false,
+		EsMutable:     true,
 	}
 	return e
 }
-
 func NewSimboloArreglo(linea int, columna int, identificador string, tipoDatos TipoDato) Simbolo {
 	e := Simbolo{
 		Linea:         linea,
@@ -71,6 +101,13 @@ func NewSimboloArreglo(linea int, columna int, identificador string, tipoDatos T
 		Valor:         nil,
 		Tipo:          tipoDatos,
 		ListaParams:   nil,
+		EsReferencia:  false,
+		EsMutable:     true,
 	}
 	return e
+}
+
+// IMPLEMENTANDO INTERFAZ
+func (s Simbolo) GetTipo() TipoDato {
+	return s.Tipo
 }

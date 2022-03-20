@@ -2,6 +2,7 @@ package instrucciones
 
 import (
 	"fmt"
+	"p1/packages/Analizador"
 	"p1/packages/Analizador/ast/expresion"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
@@ -21,19 +22,26 @@ type Declaracion struct {
 	ValorInicializacion interfaces.Expresion
 	TipoVariables       entorno.TipoDato
 	ListaVars           *arraylist.List
+	EsMutable    	    bool
+	Linea 				int
+	Columna				int
 }
 
 func NuevaDeclaracion(listaVars *arraylist.List, tipoVariables entorno.TipoDato) *Declaracion {
 	return &Declaracion{
 		TipoVariables: tipoVariables,
 		ListaVars:     listaVars,
+
 	}
 }
-func NuevaDeclaracionInicializacion(listaVars *arraylist.List, tipoVariables entorno.TipoDato, valInicial interfaces.Expresion) *Declaracion {
+func NuevaDeclaracionInicializacion(listaVars *arraylist.List, tipoVariables entorno.TipoDato, valInicial interfaces.Expresion, esMutable bool, linea int, columna int) *Declaracion {
 	return &Declaracion{
 		TipoVariables:       tipoVariables,
 		ListaVars:           listaVars,
 		ValorInicializacion: valInicial,
+		EsMutable:			 esMutable,
+		Linea: 				 linea,
+		Columna: 			 columna,
 	}
 }
 
@@ -51,12 +59,27 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 			return nil
 		}
 
+		var tipoResultante entorno.TipoDato
+
 		retornoExpresion := dec.ValorInicializacion.ObtenerValor(ent)
 
 		tipoExpresion := retornoExpresion.Tipo
-		tipoDeclaracion := dec.TipoVariables
+		tipoVariable := dec.TipoVariables
 
-		tipoResultante := tipoDef[tipoDeclaracion][tipoExpresion]
+		fmt.Printf("\nTIPO DE EXPRESION A DECLARAR: %v", tipoExpresion)
+		fmt.Printf("\nLinea: %v", dec.Linea)
+		fmt.Printf("\nColumna: %v", dec.Columna)
+
+		/*
+			Inferencia de tipos
+			En caso el tipo de la variable venga NULL, al tipo
+			resultante se le asigna el valor del tipo de la expresión.
+		*/
+		if tipoVariable != entorno.NULL {
+			tipoResultante = tipoDef[tipoVariable][tipoExpresion]
+		} else {
+			tipoResultante = tipoExpresion
+		}
 
 		if tipoResultante == entorno.NULL {
 			return nil
@@ -68,16 +91,25 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 
 			if ent.ExisteSimbolo(varDeclarar.Identificador) {
 				// TODO: ALMACENAR ERROR SINTACTICO
-				fmt.Printf("Errror, variable %s ya declarada", varDeclarar.Identificador)
+				nuevoError := Analizador.NewErrorSemantico(
+					dec.Linea,
+					dec.Columna,
+					"Error Semántico, la variable " + varDeclarar.Identificador + " ya está declarada.",
+				)
+				Analizador.ListaErrores.Add(nuevoError)
+
 			} else {
+
 				simboloTabla := entorno.NuevoSimboloIdentificadorValor(
 					0,
 					0,
 					varDeclarar.Identificador,
 					retornoExpresion.Valor,
-					tipoResultante)
+					tipoResultante,
+					dec.EsMutable)
 
 				ent.AgregarSimbolo(varDeclarar.Identificador, simboloTabla)
+
 			}
 
 		}

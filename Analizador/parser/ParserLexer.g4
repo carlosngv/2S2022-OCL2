@@ -13,38 +13,40 @@ L_CORCH  : '[';
 R_CORCH  : ']';
 
 
-OUT:      'out';
-PRINTLN:   'println';
+PRINTLN:   'println!';
 
 
 IF_TOK:     'if';
 ELSE:       'else';
 
-ARGS:       'args';
+MUT:        'mut';
+LET:        'let';
 CLASS:      'class';
+NEW_:       'new';
 MAIN:       'main';
 PRIVATE:    'private';
 PUBLIC:     'public';
 STATIC:     'static';
-STRINGARGS: 'String';
 RETURN_P:   'return';
 
-INTTYPE:    'int';
-FLOATTYPE:  'float';
-STRINGTYPE: 'string';
+INTTYPE:    'i64';
+FLOATTYPE:  'f64';
+STRINGTYPE: 'String';
+STRTYPE: '&str';
 VOIDTYPE:   'void';
-SYSTEM:     'system';
 BOOLTYPE:   'boolean';
 
 
 PUNTO       : '.';
 COMA        : ',';
 PTCOMA      : ';';
+DOSPUNTOS   : ':';
 
 AND:        '&&';
 OR:         '||';
 NOT:         '!' ;
 IGUAL:     '=';
+IGUAL_IGUAL:     '==';
 DIFERENTE: '!=';
 MAYORIGUAL: '>=';
 MENORIGUAL: '<=';

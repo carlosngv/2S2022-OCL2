@@ -31,6 +31,15 @@ var resta_dominante = [5][5]entorno.TipoDato{
 	{entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL},
 }
 
+var relacional_dominante = [5][5]entorno.TipoDato{
+	{entorno.INTEGER, entorno.FLOAT, entorno.NULL, entorno.NULL, entorno.NULL},
+	{entorno.FLOAT, entorno.FLOAT, entorno.NULL, entorno.NULL, entorno.NULL},
+	{entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL},
+	{entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL},
+	{entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL, entorno.NULL},
+}
+
+
 type Operacion struct {
 	Op1      pInterfaces.Expresion
 	Operador string
@@ -75,92 +84,203 @@ func (p Operacion) ObtenerValor(ent entorno.Entorno) entorno.TipoRetorno {
 	var dominante entorno.TipoDato
 
 	switch p.Operador {
-	case "+":
-		{
+		case "+":
+			{
 
-			dominante = suma_dominante[retornoIzq.Tipo][retornoDer.Tipo]
-
-			if dominante == entorno.INTEGER {
-
-				/*
-
-					nuevaVariable :=   variable.(instrucciones.Imprimir)
-
-				*/
-
-				fmt.Printf(" valor: %v", retornoIzq.Valor)
-				fmt.Printf(" valor: %v", retornoDer.Valor)
-
-				return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) + retornoDer.Valor.(int)}
-
-			} else if dominante == entorno.FLOAT {
-				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
-				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
-				return entorno.TipoRetorno{Tipo: dominante, Valor: val1 + val2}
-
-			} else if dominante == entorno.STRING {
-
-				r1 := fmt.Sprintf("%v", retornoIzq.Valor)
-				r2 := fmt.Sprintf("%v", retornoDer.Valor)
-
-				return entorno.TipoRetorno{Tipo: dominante, Valor: r1 + r2}
-			}
-
-		}
-
-	case "*":
-		{
-			dominante = multi_division_dominante[retornoIzq.Tipo][retornoDer.Tipo]
-
-			if dominante == entorno.INTEGER {
-				return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) * retornoDer.Valor.(int)}
-
-			} else if dominante == entorno.FLOAT {
-				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
-				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
-				return entorno.TipoRetorno{Tipo: dominante, Valor: val1 * val2}
-
-			} else if dominante == entorno.NULL {
-				return entorno.TipoRetorno{Tipo: dominante, Valor: nil}
-			}
-
-		}
-	case "-":
-		{
-			if p.Unario {
-
-				fmt.Printf("%v ", retornoIzq.Valor)
-
-				if retornoIzq.Tipo != entorno.INTEGER && retornoIzq.Tipo != entorno.FLOAT {
-					return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: nil}
-				}
-
-				if retornoIzq.Tipo == entorno.INTEGER {
-					return entorno.TipoRetorno{Tipo: retornoIzq.Tipo, Valor: -1 * retornoIzq.Valor.(int)}
-				} else if retornoIzq.Tipo == entorno.FLOAT {
-					return entorno.TipoRetorno{Tipo: retornoIzq.Tipo, Valor: -1 * retornoIzq.Valor.(float64)}
-				}
-
-			} else {
-				dominante = resta_dominante[retornoIzq.Tipo][retornoDer.Tipo]
+				dominante = suma_dominante[retornoIzq.Tipo][retornoDer.Tipo]
 
 				if dominante == entorno.INTEGER {
 
-					fmt.Println(retornoIzq.Tipo)
-					fmt.Println(retornoDer.Tipo)
+					/*
 
-					return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) - retornoDer.Valor.(int)}
+						nuevaVariable :=   variable.(instrucciones.Imprimir)
+
+					*/
+
+					fmt.Printf(" valor: %v", retornoIzq.Valor)
+					fmt.Printf(" valor: %v", retornoDer.Valor)
+
+					return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) + retornoDer.Valor.(int)}
 
 				} else if dominante == entorno.FLOAT {
 					val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
 					val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
-					return entorno.TipoRetorno{Tipo: dominante, Valor: val1 - val2}
+					return entorno.TipoRetorno{Tipo: dominante, Valor: val1 + val2}
+
+				} else if dominante == entorno.STRING {
+
+					r1 := fmt.Sprintf("%v", retornoIzq.Valor)
+					r2 := fmt.Sprintf("%v", retornoDer.Valor)
+
+					return entorno.TipoRetorno{Tipo: dominante, Valor: r1 + r2}
+				}
+
+			}
+
+		case "*": {
+				dominante = multi_division_dominante[retornoIzq.Tipo][retornoDer.Tipo]
+
+				if dominante == entorno.INTEGER {
+					return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) * retornoDer.Valor.(int)}
+
+				} else if dominante == entorno.FLOAT {
+					val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+					val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+					return entorno.TipoRetorno{Tipo: dominante, Valor: val1 * val2}
 
 				} else if dominante == entorno.NULL {
 					return entorno.TipoRetorno{Tipo: dominante, Valor: nil}
 				}
+
+			}
+		case "-": {
+				if p.Unario {
+
+					fmt.Printf("%v ", retornoIzq.Valor)
+
+					if retornoIzq.Tipo != entorno.INTEGER && retornoIzq.Tipo != entorno.FLOAT {
+						return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: nil}
+					}
+
+					if retornoIzq.Tipo == entorno.INTEGER {
+						return entorno.TipoRetorno{Tipo: retornoIzq.Tipo, Valor: -1 * retornoIzq.Valor.(int)}
+					} else if retornoIzq.Tipo == entorno.FLOAT {
+						return entorno.TipoRetorno{Tipo: retornoIzq.Tipo, Valor: -1 * retornoIzq.Valor.(float64)}
+					}
+
+				} else {
+					dominante = resta_dominante[retornoIzq.Tipo][retornoDer.Tipo]
+
+					if dominante == entorno.INTEGER {
+
+						fmt.Println(retornoIzq.Tipo)
+						fmt.Println(retornoDer.Tipo)
+
+						return entorno.TipoRetorno{Tipo: dominante, Valor: retornoIzq.Valor.(int) - retornoDer.Valor.(int)}
+
+					} else if dominante == entorno.FLOAT {
+						val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+						val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+						return entorno.TipoRetorno{Tipo: dominante, Valor: val1 - val2}
+
+					} else if dominante == entorno.NULL {
+						return entorno.TipoRetorno{Tipo: dominante, Valor: nil}
+					}
+				}
+			}
+		case ">": {
+			valorIzq := retornoIzq.Valor
+			valorDer := retornoDer.Valor
+			if(retornoIzq.Tipo == entorno.STRING && retornoDer.Tipo == entorno.STRING) {
+				if(len(valorIzq.(string)) > len(valorDer.(string))) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.INTEGER && retornoDer.Tipo == entorno.INTEGER) {
+				if(valorIzq.(int) > valorDer.(int)) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.FLOAT && retornoDer.Tipo == entorno.FLOAT) {
+				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+				if(val1 > val2) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			}
+
+		}
+		case "<": {
+			valorIzq := retornoIzq.Valor
+			valorDer := retornoDer.Valor
+			if(retornoIzq.Tipo == entorno.STRING && retornoDer.Tipo == entorno.STRING) {
+				if(len(valorIzq.(string)) < len(valorDer.(string))) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.INTEGER && retornoDer.Tipo == entorno.INTEGER) {
+				if(valorIzq.(int) < valorDer.(int)) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.FLOAT && retornoDer.Tipo == entorno.FLOAT) {
+				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+				if(val1 < val2) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
 			}
 		}
+		case ">=": {
+			valorIzq := retornoIzq.Valor
+			valorDer := retornoDer.Valor
+			if(retornoIzq.Tipo == entorno.STRING && retornoDer.Tipo == entorno.STRING) {
+				if(len(valorIzq.(string)) >= len(valorDer.(string))) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.INTEGER && retornoDer.Tipo == entorno.INTEGER) {
+				if(valorIzq.(int) >= valorDer.(int)) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.FLOAT && retornoDer.Tipo == entorno.FLOAT) {
+				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+				if(val1 >= val2) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			}
+		}
+		case "<=": {
+			valorIzq := retornoIzq.Valor
+			valorDer := retornoDer.Valor
+			if(retornoIzq.Tipo == entorno.STRING && retornoDer.Tipo == entorno.STRING) {
+				if(len(valorIzq.(string)) <= len(valorDer.(string))) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.INTEGER && retornoDer.Tipo == entorno.INTEGER) {
+				if(valorIzq.(int) <= valorDer.(int)) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.FLOAT && retornoDer.Tipo == entorno.FLOAT) {
+				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+				if(val1 <= val2) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			}
+		}
+		case "==": {
+			valorIzq := retornoIzq.Valor
+			valorDer := retornoDer.Valor
+			if(retornoIzq.Tipo == entorno.STRING && retornoDer.Tipo == entorno.STRING) {
+				if(len(valorIzq.(string)) == len(valorDer.(string))) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.INTEGER && retornoDer.Tipo == entorno.INTEGER) {
+				if(valorIzq.(int) == valorDer.(int)) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			} else if(retornoIzq.Tipo == entorno.FLOAT && retornoDer.Tipo == entorno.FLOAT) {
+				val1, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoIzq.Valor), 64)
+				val2, _ := strconv.ParseFloat(fmt.Sprintf("%v", retornoDer.Valor), 64)
+				if(val1 == val2) {
+					return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: true}
+				}
+				return entorno.TipoRetorno{ Tipo: entorno.BOOLEAN, Valor: false}
+			}
+		}
+
+
 	}
 
 	return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: nil}

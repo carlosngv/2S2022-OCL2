@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"p1/packages/Analizador"
@@ -10,6 +9,7 @@ import (
 	"p1/packages/Analizador/parser"
 	"p1/packages/utilities"
 	"reflect"
+	"text/template"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 	"github.com/colegno/arraylist"
@@ -24,48 +24,69 @@ type Response struct {
 	Msg string `json:"msg"`
 }
 
+type Output struct {
+	Output string
+}
+
+var output Output
+
+
+var templates = template.Must(template.ParseGlob("templates/*"))
+
+
+func Index(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "index", output)
+}
+
+
 func ProcessData(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
-	var input Input
-
-	err := json.NewDecoder(r.Body).Decode(&input)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"status": http.StatusBadRequest, "msg": "Error, revise los datos ingresados."})
-		return
+	var input string
+	if r.Method == "POST" {
+		input = r.FormValue("input")
 	}
 
-	fmt.Println(input.Data)
+	w.Header().Set("content-type", "application/json")
+
+	// err := json.NewDecoder(r.Body).Decode(&input)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	json.NewEncoder(w).Encode(map[string]interface{}{"status": http.StatusBadRequest, "msg": "Error, revise los datos ingresados."})
+	// 	return
+	// }
+
+	// fmt.Println(input.Data)
 
 	errores := &utilities.CustomErrorListener{}
+	Analizador.ListaErrores = arraylist.New()
 
-
-	is := antlr.NewInputStream(input.Data)
+	is := antlr.NewInputStream(input)
 
 
 	// Creación de lexer
-	fmt.Println("Entra LEXER")
 	lexer := parser.NewParserLexer(is)
 	lexer.RemoveErrorListeners()
 	lexer.AddErrorListener(errores)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-	fmt.Println("Sale LEXER")
+
 
 	// Creando el parser
-	fmt.Println("Entra PARSER")
 	p := parser.NewParser(stream)
 	p.RemoveErrorListeners()
 	p.AddErrorListener(errores)
-	fmt.Println("Sale LEXER")
+
 	p.BuildParseTrees = true
 	tree := p.Start()
+
+	Analizador.Salida = ""
 
 	var listener *utilities.TreeShapeListener = utilities.NewTreeShapeListener()
 
 	if len(errores.Errors) == 0 {
 		antlr.ParseTreeWalkerDefault.Walk(listener, tree)
 	}
+
+	fmt.Printf("\nERRORES: %v\n", errores)
 
 	AST := listener.Ast // A partir del ast se puede acceder a los no terminales de las producciones
 
@@ -92,19 +113,19 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	fmt.Println("SALIDA: " + Analizador.Salida)
+	fmt.Println("\nSALIDA: " + Analizador.Salida)
 
-	json.NewEncoder(w).Encode(map[string]interface{}{"val": Analizador.Salida})
+	if Analizador.ListaErrores.Len() > 0 {
+		fmt.Printf("\nERRORES PROPIOS: %v\n", Analizador.ListaErrores)
+		Analizador.Salida = ""
+		for i := 0; i < Analizador.ListaErrores.Len(); i++ {
+			errorActual := Analizador.ListaErrores.GetValue(i)
+			Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
+		}
+	}
 
-	// w.WriteHeader(http.StatusOK)
+	output.Output = Analizador.Salida
 
-	// response.Status = http.StatusOK
-	// response.Msg = "Entrada procesada con exito."
-
-	// jsonResponse, err := json.Marshal(response)
-
-	// if err != nil { return }
-
-	// w.Write(jsonResponse)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 
 }

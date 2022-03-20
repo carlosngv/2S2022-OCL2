@@ -35,6 +35,9 @@ type ParserListener interface {
 	// EnterInstruccion is called when entering the instruccion production.
 	EnterInstruccion(c *InstruccionContext)
 
+	// EnterAsignacion is called when entering the asignacion production.
+	EnterAsignacion(c *AsignacionContext)
+
 	// EnterIf_instr is called when entering the if_instr production.
 	EnterIf_instr(c *If_instrContext)
 
@@ -67,6 +70,45 @@ type ParserListener interface {
 
 	// EnterTiposvars is called when entering the tiposvars production.
 	EnterTiposvars(c *TiposvarsContext)
+
+	// EnterDec_arr is called when entering the dec_arr production.
+	EnterDec_arr(c *Dec_arrContext)
+
+	// EnterDimensiones is called when entering the dimensiones production.
+	EnterDimensiones(c *DimensionesContext)
+
+	// EnterDimension is called when entering the dimension production.
+	EnterDimension(c *DimensionContext)
+
+	// EnterArraydata is called when entering the arraydata production.
+	EnterArraydata(c *ArraydataContext)
+
+	// EnterInstancia is called when entering the instancia production.
+	EnterInstancia(c *InstanciaContext)
+
+	// EnterListanchos is called when entering the listanchos production.
+	EnterListanchos(c *ListanchosContext)
+
+	// EnterAncho is called when entering the ancho production.
+	EnterAncho(c *AnchoContext)
+
+	// EnterDec_objeto is called when entering the dec_objeto production.
+	EnterDec_objeto(c *Dec_objetoContext)
+
+	// EnterInstanciaClase is called when entering the instanciaClase production.
+	EnterInstanciaClase(c *InstanciaClaseContext)
+
+	// EnterAccesoarr is called when entering the accesoarr production.
+	EnterAccesoarr(c *AccesoarrContext)
+
+	// EnterAccesoObjeto is called when entering the accesoObjeto production.
+	EnterAccesoObjeto(c *AccesoObjetoContext)
+
+	// EnterListaAccesos is called when entering the listaAccesos production.
+	EnterListaAccesos(c *ListaAccesosContext)
+
+	// EnterAcceso is called when entering the acceso production.
+	EnterAcceso(c *AccesoContext)
 
 	// EnterExpression is called when entering the expression production.
 	EnterExpression(c *ExpressionContext)
@@ -110,6 +152,9 @@ type ParserListener interface {
 	// ExitInstruccion is called when exiting the instruccion production.
 	ExitInstruccion(c *InstruccionContext)
 
+	// ExitAsignacion is called when exiting the asignacion production.
+	ExitAsignacion(c *AsignacionContext)
+
 	// ExitIf_instr is called when exiting the if_instr production.
 	ExitIf_instr(c *If_instrContext)
 
@@ -142,6 +187,45 @@ type ParserListener interface {
 
 	// ExitTiposvars is called when exiting the tiposvars production.
 	ExitTiposvars(c *TiposvarsContext)
+
+	// ExitDec_arr is called when exiting the dec_arr production.
+	ExitDec_arr(c *Dec_arrContext)
+
+	// ExitDimensiones is called when exiting the dimensiones production.
+	ExitDimensiones(c *DimensionesContext)
+
+	// ExitDimension is called when exiting the dimension production.
+	ExitDimension(c *DimensionContext)
+
+	// ExitArraydata is called when exiting the arraydata production.
+	ExitArraydata(c *ArraydataContext)
+
+	// ExitInstancia is called when exiting the instancia production.
+	ExitInstancia(c *InstanciaContext)
+
+	// ExitListanchos is called when exiting the listanchos production.
+	ExitListanchos(c *ListanchosContext)
+
+	// ExitAncho is called when exiting the ancho production.
+	ExitAncho(c *AnchoContext)
+
+	// ExitDec_objeto is called when exiting the dec_objeto production.
+	ExitDec_objeto(c *Dec_objetoContext)
+
+	// ExitInstanciaClase is called when exiting the instanciaClase production.
+	ExitInstanciaClase(c *InstanciaClaseContext)
+
+	// ExitAccesoarr is called when exiting the accesoarr production.
+	ExitAccesoarr(c *AccesoarrContext)
+
+	// ExitAccesoObjeto is called when exiting the accesoObjeto production.
+	ExitAccesoObjeto(c *AccesoObjetoContext)
+
+	// ExitListaAccesos is called when exiting the listaAccesos production.
+	ExitListaAccesos(c *ListaAccesosContext)
+
+	// ExitAcceso is called when exiting the acceso production.
+	ExitAcceso(c *AccesoContext)
 
 	// ExitExpression is called when exiting the expression production.
 	ExitExpression(c *ExpressionContext)

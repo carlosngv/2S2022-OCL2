@@ -1,0 +1,18 @@
+main()
+{
+	let valor1: f64 = 19.33;
+	let valor2: f64 = 11.33;
+
+	let cadena1 = "hola";
+	cadena1 = "adios";
+	let cadena2: String = "bye";
+
+	println!( "Caaadena1: " + cadena1);
+
+	if(valor1>valor2) {
+		println!(valor1 + " es mas grande");
+	} else {
+
+		println!(valor2 + " es mas grande");
+	}
+}

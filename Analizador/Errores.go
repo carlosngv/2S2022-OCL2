@@ -1,13 +1,15 @@
 package Analizador
 
+import "github.com/colegno/arraylist"
+
 type ErrorSemantico struct {
-	linea   int
-	columna int
-	msg     string
+	Linea   int
+	Columna int
+	Msg     string
 }
 
 func NewErrorSemantico(linea int, columna int, msg string) ErrorSemantico {
-	return ErrorSemantico{linea: linea, columna: columna, msg: msg}
+	return ErrorSemantico{Linea: linea, Columna: columna, Msg: msg}
 }
 
-var ListaErrores []ErrorSemantico
+var ListaErrores *arraylist.List

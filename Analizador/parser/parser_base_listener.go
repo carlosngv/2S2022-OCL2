@@ -75,6 +75,12 @@ func (s *BaseParserListener) EnterInstruccion(ctx *InstruccionContext) {}
 // ExitInstruccion is called when production instruccion is exited.
 func (s *BaseParserListener) ExitInstruccion(ctx *InstruccionContext) {}
 
+// EnterAsignacion is called when production asignacion is entered.
+func (s *BaseParserListener) EnterAsignacion(ctx *AsignacionContext) {}
+
+// ExitAsignacion is called when production asignacion is exited.
+func (s *BaseParserListener) ExitAsignacion(ctx *AsignacionContext) {}
+
 // EnterIf_instr is called when production if_instr is entered.
 func (s *BaseParserListener) EnterIf_instr(ctx *If_instrContext) {}
 
@@ -140,6 +146,84 @@ func (s *BaseParserListener) EnterTiposvars(ctx *TiposvarsContext) {}
 
 // ExitTiposvars is called when production tiposvars is exited.
 func (s *BaseParserListener) ExitTiposvars(ctx *TiposvarsContext) {}
+
+// EnterDec_arr is called when production dec_arr is entered.
+func (s *BaseParserListener) EnterDec_arr(ctx *Dec_arrContext) {}
+
+// ExitDec_arr is called when production dec_arr is exited.
+func (s *BaseParserListener) ExitDec_arr(ctx *Dec_arrContext) {}
+
+// EnterDimensiones is called when production dimensiones is entered.
+func (s *BaseParserListener) EnterDimensiones(ctx *DimensionesContext) {}
+
+// ExitDimensiones is called when production dimensiones is exited.
+func (s *BaseParserListener) ExitDimensiones(ctx *DimensionesContext) {}
+
+// EnterDimension is called when production dimension is entered.
+func (s *BaseParserListener) EnterDimension(ctx *DimensionContext) {}
+
+// ExitDimension is called when production dimension is exited.
+func (s *BaseParserListener) ExitDimension(ctx *DimensionContext) {}
+
+// EnterArraydata is called when production arraydata is entered.
+func (s *BaseParserListener) EnterArraydata(ctx *ArraydataContext) {}
+
+// ExitArraydata is called when production arraydata is exited.
+func (s *BaseParserListener) ExitArraydata(ctx *ArraydataContext) {}
+
+// EnterInstancia is called when production instancia is entered.
+func (s *BaseParserListener) EnterInstancia(ctx *InstanciaContext) {}
+
+// ExitInstancia is called when production instancia is exited.
+func (s *BaseParserListener) ExitInstancia(ctx *InstanciaContext) {}
+
+// EnterListanchos is called when production listanchos is entered.
+func (s *BaseParserListener) EnterListanchos(ctx *ListanchosContext) {}
+
+// ExitListanchos is called when production listanchos is exited.
+func (s *BaseParserListener) ExitListanchos(ctx *ListanchosContext) {}
+
+// EnterAncho is called when production ancho is entered.
+func (s *BaseParserListener) EnterAncho(ctx *AnchoContext) {}
+
+// ExitAncho is called when production ancho is exited.
+func (s *BaseParserListener) ExitAncho(ctx *AnchoContext) {}
+
+// EnterDec_objeto is called when production dec_objeto is entered.
+func (s *BaseParserListener) EnterDec_objeto(ctx *Dec_objetoContext) {}
+
+// ExitDec_objeto is called when production dec_objeto is exited.
+func (s *BaseParserListener) ExitDec_objeto(ctx *Dec_objetoContext) {}
+
+// EnterInstanciaClase is called when production instanciaClase is entered.
+func (s *BaseParserListener) EnterInstanciaClase(ctx *InstanciaClaseContext) {}
+
+// ExitInstanciaClase is called when production instanciaClase is exited.
+func (s *BaseParserListener) ExitInstanciaClase(ctx *InstanciaClaseContext) {}
+
+// EnterAccesoarr is called when production accesoarr is entered.
+func (s *BaseParserListener) EnterAccesoarr(ctx *AccesoarrContext) {}
+
+// ExitAccesoarr is called when production accesoarr is exited.
+func (s *BaseParserListener) ExitAccesoarr(ctx *AccesoarrContext) {}
+
+// EnterAccesoObjeto is called when production accesoObjeto is entered.
+func (s *BaseParserListener) EnterAccesoObjeto(ctx *AccesoObjetoContext) {}
+
+// ExitAccesoObjeto is called when production accesoObjeto is exited.
+func (s *BaseParserListener) ExitAccesoObjeto(ctx *AccesoObjetoContext) {}
+
+// EnterListaAccesos is called when production listaAccesos is entered.
+func (s *BaseParserListener) EnterListaAccesos(ctx *ListaAccesosContext) {}
+
+// ExitListaAccesos is called when production listaAccesos is exited.
+func (s *BaseParserListener) ExitListaAccesos(ctx *ListaAccesosContext) {}
+
+// EnterAcceso is called when production acceso is entered.
+func (s *BaseParserListener) EnterAcceso(ctx *AccesoContext) {}
+
+// ExitAcceso is called when production acceso is exited.
+func (s *BaseParserListener) ExitAcceso(ctx *AccesoContext) {}
 
 // EnterExpression is called when production expression is entered.
 func (s *BaseParserListener) EnterExpression(ctx *ExpressionContext) {}
