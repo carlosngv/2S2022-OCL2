@@ -17,6 +17,7 @@ options {
     import "p1/packages/Analizador/ast/instrucciones/Definicion" // DefinicionArreglo, DefinicionObjeto
     import "p1/packages/Analizador/ast/instrucciones/SentenciasTransferencia"
     import "p1/packages/Analizador/ast/instrucciones/SentenciasControl"
+    import "p1/packages/Analizador/ast/funcionesNativas" // sqrt, abs, to_string()
     //import "p1/packages/Analizador/ast/instrucciones/SentenciasCiclicas"
     import "p1/packages/Analizador/entorno"
     import "p1/packages/Analizador/entorno/Simbolos"
@@ -114,6 +115,8 @@ instruccion returns [interfaces.Instruccion instr]
   | declaracion                              ';'                {$instr = $declaracion.instr}
   | llamada                                  ';'                {$instr = $llamada.instr}
   | retorno                                  ';'                {$instr = $retorno.instr}
+  | sentencia_break                          ';'                {$instr = $sentencia_break.instr}
+  | sentencia_continue                       ';'                {$instr = $sentencia_continue.instr}
   | dec_arr                                  ';'                {$instr = $dec_arr.instr}
   | dec_objeto                               ';'                {$instr = $dec_objeto.instr}
   | asignacion                               ';'                {$instr = $asignacion.instr}
@@ -226,6 +229,15 @@ retorno returns [interfaces.Instruccion instr]
     | RETURN_P  expression                                          { $instr = SentenciaTransferencia.NewReturn(entorno.NULL,$expression.expr)}
 ;
 
+sentencia_break returns [interfaces.Instruccion instr]
+    : BREAK_P                                                      { $instr = SentenciaTransferencia.NewBreak(entorno.VOID,nil)}
+    | BREAK_P  expression                                          { $instr = SentenciaTransferencia.NewBreak(entorno.NULL,$expression.expr)}
+;
+
+sentencia_continue returns [interfaces.Instruccion instr]
+    : CONTINUE_P                                                      { $instr = SentenciaTransferencia.NewContinue(entorno.VOID)}
+
+;
 
 
 
@@ -241,9 +253,12 @@ listides returns [*arrayList.List lista]
 tiposvars returns[entorno.TipoDato tipo]
     : INTTYPE                                                   {$tipo = entorno.INTEGER}
     | STRINGTYPE                                                {$tipo = entorno.STRING}
+    | STRTYPE                                                   {$tipo = entorno.STRING2}
+    | CHARTYPE                                                    {$tipo = entorno.CHAR}
     | FLOATTYPE                                                 {$tipo = entorno.FLOAT}
     | BOOLTYPE                                                  {$tipo = entorno.BOOLEAN}
     | VOIDTYPE                                                  {$tipo = entorno.VOID}
+    | USIZETYPE                                                  {$tipo = entorno.USIZE}
 ;
 
 
@@ -378,22 +393,54 @@ primitivo returns[interfaces.Expresion expr]
                                                                     }
                                                                     $expr = expresion.NuevoPrimitivo(num,entorno.INTEGER)
                                                                 }
+    |USIZE                                                      {
+                                                                    num,err := strconv.Atoi($USIZE.text)
+                                                                    if err!= nil{
+                                                                        fmt.Println(err)
+                                                                    }
+                                                                    $expr = expresion.NuevoPrimitivo(num,entorno.USIZE)
+                                                                }
     | FLOAT                                                     {
                                                                      num,err := strconv.ParseFloat($FLOAT.text,64)
                                                                      if err!= nil{
                                                                          fmt.Println(err)
                                                                      }
                                                                      $expr = expresion.NuevoPrimitivo(num,entorno.FLOAT)
+
                                                                 }
 
     | STRING                                                    {
                                                                     str:= $STRING.text[1:len($STRING.text)-1]
                                                                     $expr = expresion.NuevoPrimitivo(str,entorno.STRING)
                                                                 }
+    | CHAR                                                      {
+                                                                    str:= $CHAR.text[1:len($CHAR.text)-1]
+                                                                    $expr = expresion.NuevoPrimitivo(str,entorno.CHAR)
+                                                                }
 
     | ID                                                        { $expr = expresion.NuevoIdentificador($ID.text)}
 
     | TRUE                                                      { $expr = expresion.NuevoPrimitivo(true,entorno.BOOLEAN) }
     | FALSE                                                     { $expr = expresion.NuevoPrimitivo(false,entorno.BOOLEAN) }
+    | ID '.' ABS '(' ')' {
+        linea := localctx.(*PrimitivoContext).ABS().GetSymbol().GetLine()
+		columna := localctx.(*PrimitivoContext).ABS().GetSymbol().GetColumn()
+        $expr = funcionesNativas.NuevoValorAbs($ID.text, linea, columna)
+    }
+    | ID '.' SQRT '(' ')' {
+        linea := localctx.(*PrimitivoContext).SQRT().GetSymbol().GetLine()
+		columna := localctx.(*PrimitivoContext).SQRT().GetSymbol().GetColumn()
+        $expr = funcionesNativas.NuevoValorSqrt($ID.text, linea, columna)
+    }
+    | ID '.' TO_STRING '(' ')' {
+        linea := localctx.(*PrimitivoContext).TO_STRING().GetSymbol().GetLine()
+		columna := localctx.(*PrimitivoContext).TO_STRING().GetSymbol().GetColumn()
+        $expr = funcionesNativas.NuevoValorStr($ID.text, linea, columna)
+    }
+    | ID '.' CLONE '(' ')' {
+        linea := localctx.(*PrimitivoContext).CLONE().GetSymbol().GetLine()
+		columna := localctx.(*PrimitivoContext).CLONE().GetSymbol().GetColumn()
+        $expr = funcionesNativas.NuevoValorClone($ID.text, linea, columna)
+    }
 
 ;

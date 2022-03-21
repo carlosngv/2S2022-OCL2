@@ -135,6 +135,18 @@ func (s *BaseParserListener) EnterRetorno(ctx *RetornoContext) {}
 // ExitRetorno is called when production retorno is exited.
 func (s *BaseParserListener) ExitRetorno(ctx *RetornoContext) {}
 
+// EnterSentencia_break is called when production sentencia_break is entered.
+func (s *BaseParserListener) EnterSentencia_break(ctx *Sentencia_breakContext) {}
+
+// ExitSentencia_break is called when production sentencia_break is exited.
+func (s *BaseParserListener) ExitSentencia_break(ctx *Sentencia_breakContext) {}
+
+// EnterSentencia_continue is called when production sentencia_continue is entered.
+func (s *BaseParserListener) EnterSentencia_continue(ctx *Sentencia_continueContext) {}
+
+// ExitSentencia_continue is called when production sentencia_continue is exited.
+func (s *BaseParserListener) ExitSentencia_continue(ctx *Sentencia_continueContext) {}
+
 // EnterListides is called when production listides is entered.
 func (s *BaseParserListener) EnterListides(ctx *ListidesContext) {}
 

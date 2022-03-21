@@ -65,6 +65,12 @@ type ParserListener interface {
 	// EnterRetorno is called when entering the retorno production.
 	EnterRetorno(c *RetornoContext)
 
+	// EnterSentencia_break is called when entering the sentencia_break production.
+	EnterSentencia_break(c *Sentencia_breakContext)
+
+	// EnterSentencia_continue is called when entering the sentencia_continue production.
+	EnterSentencia_continue(c *Sentencia_continueContext)
+
 	// EnterListides is called when entering the listides production.
 	EnterListides(c *ListidesContext)
 
@@ -181,6 +187,12 @@ type ParserListener interface {
 
 	// ExitRetorno is called when exiting the retorno production.
 	ExitRetorno(c *RetornoContext)
+
+	// ExitSentencia_break is called when exiting the sentencia_break production.
+	ExitSentencia_break(c *Sentencia_breakContext)
+
+	// ExitSentencia_continue is called when exiting the sentencia_continue production.
+	ExitSentencia_continue(c *Sentencia_continueContext)
 
 	// ExitListides is called when exiting the listides production.
 	ExitListides(c *ListidesContext)

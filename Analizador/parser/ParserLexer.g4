@@ -28,13 +28,21 @@ PRIVATE:    'private';
 PUBLIC:     'public';
 STATIC:     'static';
 RETURN_P:   'return';
+BREAK_P:    'break';
+CONTINUE_P: 'continue';
+ABS:        'abs';
+SQRT:        'sqrt';
+TO_STRING:   'to_string';
+CLONE:       'clone';
 
 INTTYPE:    'i64';
 FLOATTYPE:  'f64';
 STRINGTYPE: 'String';
-STRTYPE: '&str';
+STRTYPE:    '&str';
+CHARTYPE:   'char';
 VOIDTYPE:   'void';
 BOOLTYPE:   'boolean';
+USIZETYPE:  'usize';
 
 
 PUNTO       : '.';
@@ -57,10 +65,13 @@ DIV: '/' ;
 ADD: '+' ;
 SUB: '-' ;
 
+// Tipos
 
 NUMBER: [0-9]+;
+USIZE: [0-9]+;
 FLOAT: [0-9]+[.][0-9]+;
 STRING: '"'~["]*'"';
+CHAR: '\''~["]*'\'';
 TRUE: 'true';
 FALSE: 'false';
 
