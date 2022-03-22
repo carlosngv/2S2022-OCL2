@@ -129,6 +129,18 @@ func (s *BaseParserListener) EnterListaexpre_case(ctx *Listaexpre_caseContext) {
 // ExitListaexpre_case is called when production listaexpre_case is exited.
 func (s *BaseParserListener) ExitListaexpre_case(ctx *Listaexpre_caseContext) {}
 
+// EnterWhile_instr is called when production while_instr is entered.
+func (s *BaseParserListener) EnterWhile_instr(ctx *While_instrContext) {}
+
+// ExitWhile_instr is called when production while_instr is exited.
+func (s *BaseParserListener) ExitWhile_instr(ctx *While_instrContext) {}
+
+// EnterLoop_instr is called when production loop_instr is entered.
+func (s *BaseParserListener) EnterLoop_instr(ctx *Loop_instrContext) {}
+
+// ExitLoop_instr is called when production loop_instr is exited.
+func (s *BaseParserListener) ExitLoop_instr(ctx *Loop_instrContext) {}
+
 // EnterConsola is called when production consola is entered.
 func (s *BaseParserListener) EnterConsola(ctx *ConsolaContext) {}
 

@@ -18,7 +18,7 @@ options {
     import "p1/packages/Analizador/ast/instrucciones/SentenciasTransferencia"
     import "p1/packages/Analizador/ast/instrucciones/SentenciasControl"
     import "p1/packages/Analizador/ast/funcionesNativas" // sqrt, abs, to_string()
-    //import "p1/packages/Analizador/ast/instrucciones/SentenciasCiclicas"
+    import "p1/packages/Analizador/ast/instrucciones/SentenciasCiclicas"
     import "p1/packages/Analizador/entorno"
     import "p1/packages/Analizador/entorno/Simbolos"
     import arrayList "github.com/colegno/arraylist"
@@ -111,6 +111,8 @@ instrucciones returns [*arrayList.List lista]
 instruccion returns [interfaces.Instruccion instr]
   : if_instr                                                    {$instr = $if_instr.instr}
   | match_instr                                                 {$instr = $match_instr.instr}
+  | loop_instr                                                  {$instr = $loop_instr.instr}
+  | while_instr                                                 {$instr = $while_instr.instr}
   | consola                                  ';'                {$instr = $consola.instr}
   | consola                                                     {$instr = $consola.instr}
   | declaracionIni                           ';'                {$instr = $declaracionIni.instr}
@@ -230,6 +232,22 @@ listaexpre_case returns [*arrayList.List lista]
 ;
 
 
+// Sección while
+
+while_instr returns [interfaces.Instruccion instr]
+    : WHILE expression bloque  {
+            $instr = SentenciasCiclicas.NewWhileInstruccion($expression.expr,$bloque.lista)
+        }
+;
+
+
+// Sección loop
+
+loop_instr returns [interfaces.Instruccion instr]
+    : LOOP bloque  {
+            $instr = SentenciasCiclicas.NewLoopInstruccion($bloque.lista)
+        }
+;
 
 
 

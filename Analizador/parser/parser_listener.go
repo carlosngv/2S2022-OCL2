@@ -62,6 +62,12 @@ type ParserListener interface {
 	// EnterListaexpre_case is called when entering the listaexpre_case production.
 	EnterListaexpre_case(c *Listaexpre_caseContext)
 
+	// EnterWhile_instr is called when entering the while_instr production.
+	EnterWhile_instr(c *While_instrContext)
+
+	// EnterLoop_instr is called when entering the loop_instr production.
+	EnterLoop_instr(c *Loop_instrContext)
+
 	// EnterConsola is called when entering the consola production.
 	EnterConsola(c *ConsolaContext)
 
@@ -202,6 +208,12 @@ type ParserListener interface {
 
 	// ExitListaexpre_case is called when exiting the listaexpre_case production.
 	ExitListaexpre_case(c *Listaexpre_caseContext)
+
+	// ExitWhile_instr is called when exiting the while_instr production.
+	ExitWhile_instr(c *While_instrContext)
+
+	// ExitLoop_instr is called when exiting the loop_instr production.
+	ExitLoop_instr(c *Loop_instrContext)
 
 	// ExitConsola is called when exiting the consola production.
 	ExitConsola(c *ConsolaContext)

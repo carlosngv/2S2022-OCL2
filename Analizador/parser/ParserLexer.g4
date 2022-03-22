@@ -21,6 +21,11 @@ IF_TOK:     'if';
 ELSE:       'else';
 MATCH:      'match';
 
+WHILE:      'while';
+LOOP:       'loop';
+FOR:        'for';
+IN:         'in';
+
 MUT:        'mut';
 LET:        'let';
 CLASS:      'class';
