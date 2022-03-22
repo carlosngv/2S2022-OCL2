@@ -110,7 +110,9 @@ instrucciones returns [*arrayList.List lista]
 
 instruccion returns [interfaces.Instruccion instr]
   : if_instr                                                    {$instr = $if_instr.instr}
+  | match_instr                                                 {$instr = $match_instr.instr}
   | consola                                  ';'                {$instr = $consola.instr}
+  | consola                                                     {$instr = $consola.instr}
   | declaracionIni                           ';'                {$instr = $declaracionIni.instr}
   | declaracion                              ';'                {$instr = $declaracion.instr}
   | llamada                                  ';'                {$instr = $llamada.instr}
@@ -136,13 +138,13 @@ asignacion returns[interfaces.Instruccion instr]
 // Sección If
 
 if_instr  returns [interfaces.Instruccion instr]
-    : IF_TOK LP expression RP bloque                                        {
+    : IF_TOK expression  bloque                                        {
         $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)
     }
-    | IF_TOK LP expression RP bprincipal = bloque ELSE  belse = bloque      {
+    | IF_TOK  expression  bprincipal = bloque ELSE  belse = bloque      {
         $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,nil,$belse.lista)
     }
-    | IF_TOK LP expression RP bprincipal = bloque listaelseif ELSE  belse = bloque {
+    | IF_TOK  expression  bprincipal = bloque listaelseif ELSE  belse = bloque {
         $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,$listaelseif.lista,$belse.lista)
     }
 ;
@@ -158,8 +160,77 @@ listaelseif returns [*arrayList.List lista]
 ;
 
 else_if returns [interfaces.Instruccion instr]
-    : ELSE IF_TOK LP expression RP bloque   {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
+    : ELSE IF_TOK expression bloque   {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
 ;
+
+// Seccion match
+
+match_instr returns [interfaces.Instruccion instr]
+    : MATCH expression bloque_match  {
+            $instr = SentenciasControl.NewMatchInstruccion($expression.expr,$bloque_match.lista)
+        }
+;
+
+/*
+
+    {
+        1 | 2 => ...
+        .
+        .
+
+        .
+        .
+        .
+    }
+
+*/
+bloque_match returns [ *arrayList.List  lista]
+    : L_LLAVE listacase  R_LLAVE {
+        $lista = $listacase.lista
+    }
+;
+
+listacase returns [*arrayList.List lista]
+@init{ $lista = arrayList.New()} // Se inicializa la lista que servirá de recolector de no terminales "match_case"
+: list += match_case+ {
+    listInt := localctx.(*ListacaseContext).GetList()
+    for _, e := range listInt {
+        $lista.Add(e.GetMatchCase())
+    }
+} // Se retorna una lista con todas las instrucciones "match_case"
+;
+
+
+// Retornará una lista de MatchCases
+match_case returns [SentenciasControl.MatchCase matchCase]
+    : listaexpre_case '=' '>' instruccion ',' {
+        listaInstr := arrayList.New()
+        listaInstr.Add($instruccion.instr)
+        $matchCase = SentenciasControl.NewMatchCase($listaexpre_case.lista, listaInstr)
+    }
+    | listaexpre_case '=' '>' bloque     {
+        $matchCase = SentenciasControl.NewMatchCase($listaexpre_case.lista, $bloque.lista)
+    }
+;
+
+listaexpre_case returns [*arrayList.List lista]
+@init{
+    $lista = arrayList.New()
+}
+    : LISTA = listaexpre_case OR_CASE expression{
+                                                    $LISTA.lista.Add( $expression.expr )
+                                                    $lista =  $LISTA.lista
+                                                }
+| expression{
+        $lista.Add( $expression.expr )
+        }
+|  GUION_BAJO {
+    $lista.Add("_")
+}
+;
+
+
+
 
 
 // Seicción Print
@@ -359,20 +430,29 @@ acceso  returns [interfaces.Expresion expr]
 expression returns[interfaces.Expresion expr]
     : expr_rel                                                  {$expr = $expr_rel.expr}
     | expr_arit                                                 {$expr = $expr_arit.expr}
+    | expr_log                                                 {$expr = $expr_log.expr}
     | instancia                                                 {$expr = $instancia.expr} // new int[4]
     | arraydata                                                 {$expr = $arraydata.expr} // datos del arreglo
+    | tiposvars ':' ':' POW '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
+    | tiposvars ':' ':' POWF '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,"pow",$opDe.expr,false, $tiposvars.tipo) }
 
 ;
 
 expr_rel returns[interfaces.Expresion expr]
-    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false)}
+    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_arit  {$expr = $expr_arit.expr}
 ;
 
+expr_log returns[interfaces.Expresion expr]
+    : '!' opU = expr_log {$expr = expresion.NuevaOperacion($opU.expr,"!",nil,true, entorno.NULL)}
+    | opIz = expr_log op=( '||' | '&&') opDe = expr_log {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    | expr_rel  {$expr = $expr_rel.expr}
+;
+
 expr_arit returns[interfaces.Expresion expr]
-    : '-' opU = expression                                      {$expr = expresion.NuevaOperacion($opU.expr,"-",nil,true)}
-    | opIz = expr_arit op=('*'|'/') opDe = expr_arit            {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false)}
-    | opIz = expr_arit op=('+'|'-') opDe = expr_arit            {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false)}
+    : '-' opU = expression                                      {$expr = expresion.NuevaOperacion($opU.expr,"-",nil,true, entorno.NULL)}
+    | opIz = expr_arit op=('*'|'/'| MOD) opDe = expr_arit       {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    | opIz = expr_arit op=('+'|'-') opDe = expr_arit            {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_valor                                                {$expr = $expr_valor.expr}
     | LP expression RP                                          {$expr = $expression.expr}
 ;

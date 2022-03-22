@@ -1,18 +1,36 @@
 main()
 {
-	let valor1: f64 = 19.33;
-	let valor2: f64 = 11.33;
+	let valor1: f64 = -19.33;
+	let valor2: f64 = 144.00;
 
-	let cadena1 = "hola";
+	let float1 = 1.0;
+	let float2 = 5.0;
+
+	let int1 = 2;
+	let in2 = 2;
+
+	let modOp = float1 % float2;
+	println!( "Operación mod: " + modOp);
+
+	let powResult = i64::pow(int1, int2);
+	println!( "Operación pow: " + powResult);
+
+	let cadena0: String = valor1.to_string();
+	let raizCuadrada = valor2.sqrt();
+	let mut cadena1 = "hola";
 	cadena1 = "adios";
 	let cadena2: String = "bye";
 
 	println!( "Caaadena1: " + cadena1);
+	println!( "Caaadena0: " + cadena0);
+	println!( "Raiz de valor2: " + raizCuadrada);
 
-	if(valor1>valor2) {
-		println!(valor1 + " es mas grande");
+	if valor2<valor1 && valor2 == 144.00 {
+		println!(valor1 + " es mas grande el valor1");
+	} else if valor2 > valor 1{
+
+		println!(valor2 + " es mas grande el valor2");
 	} else {
-
-		println!(valor2 + " es mas grande");
+		println!("nada jajaja");
 	}
 }

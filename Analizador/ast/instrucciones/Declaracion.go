@@ -1,7 +1,6 @@
 package instrucciones
 
 import (
-	"fmt"
 	"p1/packages/Analizador"
 	"p1/packages/Analizador/ast/expresion"
 	"p1/packages/Analizador/ast/interfaces"
@@ -59,6 +58,8 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 			return nil
 		}
 
+
+
 		var tipoResultante entorno.TipoDato
 
 		retornoExpresion := dec.ValorInicializacion.ObtenerValor(ent)
@@ -66,20 +67,27 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 		tipoExpresion := retornoExpresion.Tipo
 		tipoVariable := dec.TipoVariables
 
-		fmt.Printf("\nTIPO DE EXPRESION A DECLARAR: %v", tipoExpresion)
-		fmt.Printf("\nLinea: %v", dec.Linea)
-		fmt.Printf("\nColumna: %v", dec.Columna)
-
 		/*
 			Inferencia de tipos
 			En caso el tipo de la variable venga NULL, al tipo
 			resultante se le asigna el valor del tipo de la expresión.
 		*/
 		if tipoVariable != entorno.NULL {
-			tipoResultante = tipoDef[tipoVariable][tipoExpresion]
+			tipoResultante = dec.TipoVariables
 		} else {
 			tipoResultante = tipoExpresion
 		}
+
+		if tipoResultante != tipoExpresion {
+			nuevoError := Analizador.NewErrorSemantico(
+				dec.Linea,
+				dec.Columna,
+				"Error Semántico, el valor declarado en la variable " + dec.ListaVars.GetValue(0).(expresion.Identificador).Identificador + " no coincide con su tipo.",
+			)
+			Analizador.ListaErrores.Add(nuevoError)
+			return nil
+		}
+
 
 		if tipoResultante == entorno.NULL {
 			return nil
@@ -97,6 +105,7 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 					"Error Semántico, la variable " + varDeclarar.Identificador + " ya está declarada.",
 				)
 				Analizador.ListaErrores.Add(nuevoError)
+				return nil
 
 			} else {
 

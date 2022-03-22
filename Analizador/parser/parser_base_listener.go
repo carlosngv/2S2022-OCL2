@@ -99,6 +99,36 @@ func (s *BaseParserListener) EnterElse_if(ctx *Else_ifContext) {}
 // ExitElse_if is called when production else_if is exited.
 func (s *BaseParserListener) ExitElse_if(ctx *Else_ifContext) {}
 
+// EnterMatch_instr is called when production match_instr is entered.
+func (s *BaseParserListener) EnterMatch_instr(ctx *Match_instrContext) {}
+
+// ExitMatch_instr is called when production match_instr is exited.
+func (s *BaseParserListener) ExitMatch_instr(ctx *Match_instrContext) {}
+
+// EnterBloque_match is called when production bloque_match is entered.
+func (s *BaseParserListener) EnterBloque_match(ctx *Bloque_matchContext) {}
+
+// ExitBloque_match is called when production bloque_match is exited.
+func (s *BaseParserListener) ExitBloque_match(ctx *Bloque_matchContext) {}
+
+// EnterListacase is called when production listacase is entered.
+func (s *BaseParserListener) EnterListacase(ctx *ListacaseContext) {}
+
+// ExitListacase is called when production listacase is exited.
+func (s *BaseParserListener) ExitListacase(ctx *ListacaseContext) {}
+
+// EnterMatch_case is called when production match_case is entered.
+func (s *BaseParserListener) EnterMatch_case(ctx *Match_caseContext) {}
+
+// ExitMatch_case is called when production match_case is exited.
+func (s *BaseParserListener) ExitMatch_case(ctx *Match_caseContext) {}
+
+// EnterListaexpre_case is called when production listaexpre_case is entered.
+func (s *BaseParserListener) EnterListaexpre_case(ctx *Listaexpre_caseContext) {}
+
+// ExitListaexpre_case is called when production listaexpre_case is exited.
+func (s *BaseParserListener) ExitListaexpre_case(ctx *Listaexpre_caseContext) {}
+
 // EnterConsola is called when production consola is entered.
 func (s *BaseParserListener) EnterConsola(ctx *ConsolaContext) {}
 
@@ -248,6 +278,12 @@ func (s *BaseParserListener) EnterExpr_rel(ctx *Expr_relContext) {}
 
 // ExitExpr_rel is called when production expr_rel is exited.
 func (s *BaseParserListener) ExitExpr_rel(ctx *Expr_relContext) {}
+
+// EnterExpr_log is called when production expr_log is entered.
+func (s *BaseParserListener) EnterExpr_log(ctx *Expr_logContext) {}
+
+// ExitExpr_log is called when production expr_log is exited.
+func (s *BaseParserListener) ExitExpr_log(ctx *Expr_logContext) {}
 
 // EnterExpr_arit is called when production expr_arit is entered.
 func (s *BaseParserListener) EnterExpr_arit(ctx *Expr_aritContext) {}

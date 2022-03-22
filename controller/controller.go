@@ -9,6 +9,7 @@ import (
 	"p1/packages/Analizador/parser"
 	"p1/packages/utilities"
 	"reflect"
+	"strconv"
 	"text/template"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
@@ -113,19 +114,21 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	fmt.Println("\nSALIDA: " + Analizador.Salida)
+
 
 	if Analizador.ListaErrores.Len() > 0 {
 		fmt.Printf("\nERRORES PROPIOS: %v\n", Analizador.ListaErrores)
 		Analizador.Salida = ""
 		for i := 0; i < Analizador.ListaErrores.Len(); i++ {
 			errorActual := Analizador.ListaErrores.GetValue(i)
-			Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
+			// Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
+			Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + " Linea " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Linea) + ", Columna " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Columna) + ".\n"
 		}
 	}
 
 	output.Output = Analizador.Salida
 
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	fmt.Printf("\n %v \n", Analizador.Salida)
 
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }

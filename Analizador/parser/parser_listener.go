@@ -47,6 +47,21 @@ type ParserListener interface {
 	// EnterElse_if is called when entering the else_if production.
 	EnterElse_if(c *Else_ifContext)
 
+	// EnterMatch_instr is called when entering the match_instr production.
+	EnterMatch_instr(c *Match_instrContext)
+
+	// EnterBloque_match is called when entering the bloque_match production.
+	EnterBloque_match(c *Bloque_matchContext)
+
+	// EnterListacase is called when entering the listacase production.
+	EnterListacase(c *ListacaseContext)
+
+	// EnterMatch_case is called when entering the match_case production.
+	EnterMatch_case(c *Match_caseContext)
+
+	// EnterListaexpre_case is called when entering the listaexpre_case production.
+	EnterListaexpre_case(c *Listaexpre_caseContext)
+
 	// EnterConsola is called when entering the consola production.
 	EnterConsola(c *ConsolaContext)
 
@@ -122,6 +137,9 @@ type ParserListener interface {
 	// EnterExpr_rel is called when entering the expr_rel production.
 	EnterExpr_rel(c *Expr_relContext)
 
+	// EnterExpr_log is called when entering the expr_log production.
+	EnterExpr_log(c *Expr_logContext)
+
 	// EnterExpr_arit is called when entering the expr_arit production.
 	EnterExpr_arit(c *Expr_aritContext)
 
@@ -169,6 +187,21 @@ type ParserListener interface {
 
 	// ExitElse_if is called when exiting the else_if production.
 	ExitElse_if(c *Else_ifContext)
+
+	// ExitMatch_instr is called when exiting the match_instr production.
+	ExitMatch_instr(c *Match_instrContext)
+
+	// ExitBloque_match is called when exiting the bloque_match production.
+	ExitBloque_match(c *Bloque_matchContext)
+
+	// ExitListacase is called when exiting the listacase production.
+	ExitListacase(c *ListacaseContext)
+
+	// ExitMatch_case is called when exiting the match_case production.
+	ExitMatch_case(c *Match_caseContext)
+
+	// ExitListaexpre_case is called when exiting the listaexpre_case production.
+	ExitListaexpre_case(c *Listaexpre_caseContext)
 
 	// ExitConsola is called when exiting the consola production.
 	ExitConsola(c *ConsolaContext)
@@ -244,6 +277,9 @@ type ParserListener interface {
 
 	// ExitExpr_rel is called when exiting the expr_rel production.
 	ExitExpr_rel(c *Expr_relContext)
+
+	// ExitExpr_log is called when exiting the expr_log production.
+	ExitExpr_log(c *Expr_logContext)
 
 	// ExitExpr_arit is called when exiting the expr_arit production.
 	ExitExpr_arit(c *Expr_aritContext)

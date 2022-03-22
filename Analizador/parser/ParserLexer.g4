@@ -11,6 +11,7 @@ L_LLAVE  : '{';
 R_LLAVE  : '}';
 L_CORCH  : '[';
 R_CORCH  : ']';
+GUION_BAJO: '_';
 
 
 PRINTLN:   'println!';
@@ -18,6 +19,7 @@ PRINTLN:   'println!';
 
 IF_TOK:     'if';
 ELSE:       'else';
+MATCH:      'match';
 
 MUT:        'mut';
 LET:        'let';
@@ -34,6 +36,8 @@ ABS:        'abs';
 SQRT:        'sqrt';
 TO_STRING:   'to_string';
 CLONE:       'clone';
+POW:         'pow';
+POWF:         'powf';
 
 INTTYPE:    'i64';
 FLOATTYPE:  'f64';
@@ -51,6 +55,7 @@ PTCOMA      : ';';
 DOSPUNTOS   : ':';
 
 AND:        '&&';
+OR_CASE:    '|';
 OR:         '||';
 NOT:         '!' ;
 IGUAL:     '=';
@@ -64,7 +69,7 @@ MUL: '*' ;
 DIV: '/' ;
 ADD: '+' ;
 SUB: '-' ;
-
+MOD: '%' ;
 // Tipos
 
 NUMBER: [0-9]+;

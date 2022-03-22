@@ -1,7 +1,6 @@
 package asignacion
 
 import (
-	"fmt"
 	"p1/packages/Analizador"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
@@ -41,7 +40,7 @@ func (asignacion *Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
 
 	// Validar existencia de simbolo
 	if !ent.ExisteSimbolo(asignacion.ID) {
-		fmt.Println("Error Semántico, el identificador" + asignacion.ID + " no está definido.")
+
 		nuevoError := Analizador.NewErrorSemantico(
 			asignacion.Linea,
 			asignacion.Columna,
@@ -57,12 +56,10 @@ func (asignacion *Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
 	if reflect.TypeOf(simbolo) == reflect.TypeOf(entorno.Simbolo{}) {
 
 		simboloPrimitivo := simbolo.(entorno.Simbolo)
-		fmt.Printf("\nSimbolo primitivo: %v\n", simboloPrimitivo)
 
 		var valorAsignacion entorno.TipoRetorno
 
 		if !simboloPrimitivo.EsMutable {
-			fmt.Println("Error Semántico, la variable " + asignacion.ID + " no es mutable.")
 			nuevoError := Analizador.NewErrorSemantico(
 				asignacion.Linea,
 				asignacion.Columna,
@@ -82,7 +79,6 @@ func (asignacion *Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
 		if simboloPrimitivo.EsReferencia && asignacion.NuevoValor != nil { // Es referencia y trae NuevoValor
 
 			if valorAsignacion.Tipo != simboloPrimitivo.Tipo {
-				fmt.Println("Error Semántico, el tipo del nuevo valor de " + asignacion.ID + " no coincide.")
 				nuevoError := Analizador.NewErrorSemantico(
 					asignacion.Linea,
 					asignacion.Columna,
@@ -109,7 +105,6 @@ func (asignacion *Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
 		} else if !simboloPrimitivo.EsReferencia && asignacion.NuevoValor != nil { // No es referencia y trae NuevoValor
 
 			if valorAsignacion.Tipo != simboloPrimitivo.Tipo {
-				fmt.Println("Error Semántico, el tipo del nuevo valor de " + asignacion.ID + " no coincide.")
 				nuevoError := Analizador.NewErrorSemantico(
 					asignacion.Linea,
 					asignacion.Columna,
