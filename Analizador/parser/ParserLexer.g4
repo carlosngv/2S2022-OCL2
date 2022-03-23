@@ -16,6 +16,8 @@ GUION_BAJO: '_';
 
 PRINTLN:   'println!';
 
+VEC:        'vec!';
+VEC_VACIO:  'Vec';
 
 IF_TOK:     'if';
 ELSE:       'else';
@@ -27,12 +29,13 @@ FOR:        'for';
 IN:         'in';
 
 MUT:        'mut';
+FN:          'fn';
 LET:        'let';
 CLASS:      'class';
 NEW_:       'new';
 MAIN:       'main';
 PRIVATE:    'private';
-PUBLIC:     'public';
+PUB:     'pub';
 STATIC:     'static';
 RETURN_P:   'return';
 BREAK_P:    'break';

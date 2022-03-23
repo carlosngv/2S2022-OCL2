@@ -27,17 +27,24 @@ func NewLoopInstruccion(listaInstrucciones *arrayList.List) LoopInstruccion {
 
 func (l LoopInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
-	nuevoEntornoLoop := entorno.NewEntorno("LOOP", &ent)
 	var retorno interface{}
+	sale := false
 	for {
+		// nuevoEntornoLoop := entorno.NewEntorno("LOOP", &ent)
 		for i := 0; i < l.ListaInstrucciones.Len(); i++ {
 			instr := l.ListaInstrucciones.GetValue(i).(interfaces.Instruccion)
-			retorno = instr.Ejecutar(nuevoEntornoLoop)
-		}
-		if retorno != nil {
-			if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
-				break
+			retorno = instr.Ejecutar(ent)
+
+			if retorno != nil {
+				if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
+					sale = true
+					break
+				}
 			}
+
+		}
+		if sale {
+			break
 		}
 	}
 

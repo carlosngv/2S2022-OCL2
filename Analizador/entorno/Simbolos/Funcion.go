@@ -24,19 +24,21 @@ type Funcion struct {
 	entorno.Simbolo
 	ListaParamsDecl    *arraylist.List
 	ListaInstrucciones *arraylist.List
+	Acceso 				entorno.TipoModAccess
 }
 
-func NuevoFuncion(nombre string, listaParams *arraylist.List, listaInstrucciones *arraylist.List, tipo entorno.TipoDato) Funcion {
+func NuevoFuncion(nombre string, listaParams *arraylist.List, listaInstrucciones *arraylist.List, tipo entorno.TipoDato, acceso entorno.TipoModAccess) Funcion {
 	funcSimbolo := entorno.NuevoSimboloFuncion(0, 0, nombre, tipo, listaParams)
 
 	return Funcion{
 		ListaInstrucciones: listaInstrucciones,
 		ListaParamsDecl:    listaParams,
 		Simbolo:            funcSimbolo,
+		Acceso:				acceso,
 	}
 }
 
-func (f Funcion) EjecutarParametros(ent entorno.Entorno, expresiones *arraylist.List) bool {
+func (f Funcion) EjecutarParametros(ent entorno.Entorno, expresiones *arraylist.List, entRef *entorno.Entorno) bool {
 
 	declaraciones := f.ListaParamsDecl.Clone()
 
@@ -48,6 +50,9 @@ func (f Funcion) EjecutarParametros(ent entorno.Entorno, expresiones *arraylist.
 	for i := 0; i < declaraciones.Len(); i++ {
 
 		pivoteDec := declaraciones.GetValue(i).(*instrucciones.Declaracion)
+		if pivoteDec.Referencia {
+			pivoteDec.EntornoRef = entRef
+		}
 		pivoteDec.ValorInicializacion = expresiones.GetValue(i).(interfaces.Expresion)
 
 		pivoteDec.Ejecutar(ent)
@@ -61,7 +66,6 @@ func (f Funcion) Ejecutar(ent entorno.Entorno) interface{} {
 	for i := 0; i < f.ListaInstrucciones.Len(); i++ {
 
 		instrPivote := f.ListaInstrucciones.GetValue(i).(interfaces.Instruccion)
-
 		valorInstruccion := instrPivote.Ejecutar(ent)
 
 		tipoRetFuncion := f.Tipo
@@ -76,12 +80,15 @@ func (f Funcion) Ejecutar(ent entorno.Entorno) interface{} {
 			}
 
 			valorRetorno := valorInstruccion.(entorno.TipoRetorno)
+			fmt.Printf("\n ValorRet: %v \n", valorRetorno)
 
-			compararTipos := retornoVal[tipoRetFuncion][valorRetorno.Tipo]
+			if valorRetorno.Tipo != entorno.VOID {
+				compararTipos := retornoVal[tipoRetFuncion][valorRetorno.Tipo]
 
-			if compararTipos == entorno.NULL {
-				fmt.Println("Error tipos, se esperaba un retorno de igual tipo")
-				return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: -1}
+				if compararTipos == entorno.NULL {
+					fmt.Println("Error tipos, se esperaba un retorno de igual tipo")
+					return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: -1}
+				}
 			}
 
 			return valorRetorno

@@ -44,7 +44,12 @@ func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
 			instr := i.ListaInstruccionesPrincipal.GetValue(j).(interfaces.Instruccion)
 
-			instr.Ejecutar(entornoNuevoIf)
+			retorno := instr.Ejecutar(entornoNuevoIf)
+			if retorno != nil {
+				if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
+					return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
+				}
+			}
 		}
 
 	} else {
@@ -60,6 +65,7 @@ func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 					return nil
 				}
 
+
 				if retornoCondicionNuevoIf.Valor.(bool) {
 
 					entornoNuevoElseIf := entorno.NewEntorno("Else if", &ent)
@@ -68,7 +74,12 @@ func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
 						instr := nuevoIf.ListaInstruccionesPrincipal.GetValue(j).(interfaces.Instruccion)
 
-						instr.Ejecutar(entornoNuevoElseIf)
+						retorno := instr.Ejecutar(entornoNuevoElseIf)
+						if retorno != nil {
+							if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
+								return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
+							}
+						}
 					}
 
 					return nil
@@ -85,7 +96,12 @@ func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
 				instr := i.ListaInstruccionesElse.GetValue(j).(interfaces.Instruccion)
 
-				instr.Ejecutar(entornoElseFinal)
+				retorno := instr.Ejecutar(entornoElseFinal)
+				if retorno != nil {
+					if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
+						return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
+					}
+				}
 			}
 
 		}

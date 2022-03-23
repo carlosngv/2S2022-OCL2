@@ -3,6 +3,7 @@ main() {
 
     loop {
         x = x + 1;
+            break;
 
         if(x > 3) {
             break;

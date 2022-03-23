@@ -16,8 +16,8 @@ type Asignacion struct {
 
 }
 
-func NuevaAsignacion(id string, nuevoValor interfaces.Expresion, linea int, columna int ) *Asignacion{
-	return &Asignacion{
+func NuevaAsignacion(id string, nuevoValor interfaces.Expresion, linea int, columna int ) Asignacion{
+	return Asignacion{
 		ID:				id,
 		NuevoValor:		nuevoValor,
 		Valor:			nil,
@@ -26,8 +26,8 @@ func NuevaAsignacion(id string, nuevoValor interfaces.Expresion, linea int, colu
 	}
 }
 
-func NuevaAsignacionValor(id string, valor interface{} ) *Asignacion{
-	return &Asignacion{
+func NuevaAsignacionValor(id string, valor interface{} ) Asignacion{
+	return Asignacion{
 		ID:				id,
 		NuevoValor:		nil,
 		Valor:			valor,
@@ -36,7 +36,7 @@ func NuevaAsignacionValor(id string, valor interface{} ) *Asignacion{
 	}
 }
 
-func (asignacion *Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
+func (asignacion Asignacion) Ejecutar(ent entorno.Entorno) interface{} {
 
 	// Validar existencia de simbolo
 	if !ent.ExisteSimbolo(asignacion.ID) {

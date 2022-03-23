@@ -24,6 +24,8 @@ type Declaracion struct {
 	EsMutable    	    bool
 	Linea 				int
 	Columna				int
+	Referencia          bool
+	EntornoRef          *entorno.Entorno
 }
 
 func NuevaDeclaracion(listaVars *arraylist.List, tipoVariables entorno.TipoDato) *Declaracion {
@@ -33,6 +35,15 @@ func NuevaDeclaracion(listaVars *arraylist.List, tipoVariables entorno.TipoDato)
 
 	}
 }
+
+func NewDeclaracionParametro(listaVars *arraylist.List, tipoVariables entorno.TipoDato, referencia bool) *Declaracion {
+	return &Declaracion{
+		TipoVariables: tipoVariables,
+		ListaVars:     listaVars,
+		Referencia:    referencia,
+	}
+}
+
 func NuevaDeclaracionInicializacion(listaVars *arraylist.List, tipoVariables entorno.TipoDato, valInicial interfaces.Expresion, esMutable bool, linea int, columna int) *Declaracion {
 	return &Declaracion{
 		TipoVariables:       tipoVariables,

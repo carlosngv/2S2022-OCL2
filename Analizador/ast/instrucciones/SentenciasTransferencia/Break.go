@@ -1,4 +1,4 @@
-package SentenciaTransferencia
+package SentenciasTransferencia
 
 import (
 	"p1/packages/Analizador/ast/interfaces"

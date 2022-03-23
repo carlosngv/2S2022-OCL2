@@ -51,13 +51,14 @@ listaFunciones returns [*arrayList.List lista]
 funcionItem   returns [ interfaces.Instruccion  instr]
 @init{ listaParams :=  arrayList.New() }
     : funcmain                                              { $instr =  $funcmain.instr}
-    | modaccess tiposvars ID '(' ')' bloque                 { $instr = Simbolos.NuevoFuncion($ID.text,listaParams,$bloque.lista,entorno.VOID)}
-    | modaccess tiposvars ID '('  parametros ')' bloque     { $instr = Simbolos.NuevoFuncion($ID.text,$parametros.lista,$bloque.lista,$tiposvars.tipo)}
+    | modaccess FN ID '(' ')' bloque                 { $instr = Simbolos.NuevoFuncion($ID.text,listaParams,$bloque.lista,entorno.VOID, $modaccess.modAccess)}
+    | modaccess FN ID '('  parametros ')' bloque     { $instr = Simbolos.NuevoFuncion($ID.text,$parametros.lista,$bloque.lista,entorno.VOID, $modaccess.modAccess)}
+    | modaccess FN ID '(' ')' '-' '>' tiposvars bloque                 { $instr = Simbolos.NuevoFuncion($ID.text,listaParams,$bloque.lista,$tiposvars.tipo, $modaccess.modAccess)}
+    | modaccess FN ID '('  parametros ')' '-' '>' tiposvars bloque     { $instr = Simbolos.NuevoFuncion($ID.text,$parametros.lista,$bloque.lista,$tiposvars.tipo, $modaccess.modAccess)}
 ;
 
 modaccess returns [entorno.TipoModAccess  modAccess]
-    : PUBLIC                                                { $modAccess = entorno.PUBLIC}
-    | PRIVATE                                               { $modAccess = entorno.PRIVATE}
+    : PUB                                                { $modAccess = entorno.PUBLIC}
     |                                                       { $modAccess = entorno.PRIVATE}
 ;
 
@@ -85,8 +86,8 @@ $lista =  arrayList.New()
 
 funcmain returns[interfaces.Instruccion instr]
 @init{ listaParams:= arrayList.New() }
-    : MAIN '(' ')' bloque
-    { $instr = Simbolos.NuevoFuncion("main",listaParams,$bloque.lista,entorno.VOID)}
+    : FN MAIN '(' ')' bloque
+    { $instr = Simbolos.NuevoFuncion("main",listaParams,$bloque.lista,entorno.VOID, entorno.PRIVATE)}
 ;
 
 
@@ -109,32 +110,28 @@ instrucciones returns [*arrayList.List lista]
 ;
 
 instruccion returns [interfaces.Instruccion instr]
-  : if_instr                                                    {$instr = $if_instr.instr}
+  : asignacion                               ';'                {$instr = $asignacion.instr}
+  | sentencia_break                          ';'                {$instr = $sentencia_break.instr}
   | match_instr                                                 {$instr = $match_instr.instr}
-  | loop_instr                                                  {$instr = $loop_instr.instr}
-  | while_instr                                                 {$instr = $while_instr.instr}
   | consola                                  ';'                {$instr = $consola.instr}
   | consola                                                     {$instr = $consola.instr}
+  | while_instr                                                 {$instr = $while_instr.instr}
+  | loop_instr                                                  {$instr = $loop_instr.instr}
+  | if_instr                                                    {$instr = $if_instr.instr}
   | declaracionIni                           ';'                {$instr = $declaracionIni.instr}
   | declaracion                              ';'                {$instr = $declaracion.instr}
   | llamada                                  ';'                {$instr = $llamada.instr}
   | retorno                                  ';'                {$instr = $retorno.instr}
-  | sentencia_break                          ';'                {$instr = $sentencia_break.instr}
   | sentencia_continue                       ';'                {$instr = $sentencia_continue.instr}
   | dec_arr                                  ';'                {$instr = $dec_arr.instr}
   | dec_objeto                               ';'                {$instr = $dec_objeto.instr}
-  | asignacion                               ';'                {$instr = $asignacion.instr}
 ;
 
 
 // SECCIón ASIGNACIóN
 
 asignacion returns[interfaces.Instruccion instr]
-    : ID '=' expression {
-            linea := localctx.(*AsignacionContext).Get_expression().GetStart().GetLine()
-            columna := localctx.(*AsignacionContext).Get_expression().GetStart().GetColumn()
-            $instr = asignacion.NuevaAsignacion($ID.text, $expression.expr, linea, columna)
-        }
+    : ID '=' expression {$instr = asignacion.NuevaAsignacion($ID.text, $expression.expr, 0,0 )}
 ;
 
 // Sección If
@@ -305,6 +302,7 @@ declaracionIni returns [interfaces.Instruccion instr]
                                                                         columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
                                                                         $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, true, linea, columna)
                                                                      }
+    | LET MUT ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' listaExpresiones           { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo,$listaExpresiones.lista) }
 ;
 
 declaracion returns [interfaces.Instruccion instr]
@@ -314,17 +312,17 @@ declaracion returns [interfaces.Instruccion instr]
 ;
 
 retorno returns [interfaces.Instruccion instr]
-    : RETURN_P                                                      { $instr = SentenciaTransferencia.NewReturn(entorno.VOID,nil)}
-    | RETURN_P  expression                                          { $instr = SentenciaTransferencia.NewReturn(entorno.NULL,$expression.expr)}
+    : RETURN_P                                                      { $instr = SentenciasTransferencia.NewReturn(entorno.VOID,nil)}
+    | RETURN_P  expression                                          { $instr = SentenciasTransferencia.NewReturn(entorno.NULL,$expression.expr)}
 ;
 
 sentencia_break returns [interfaces.Instruccion instr]
-    : BREAK_P                                                      { $instr = SentenciaTransferencia.NewBreak(entorno.VOID,nil)}
-    | BREAK_P  expression                                          { $instr = SentenciaTransferencia.NewBreak(entorno.NULL,$expression.expr)}
+    : BREAK_P                                                      { $instr = SentenciasTransferencia.NewBreak(entorno.VOID,nil)}
+    | BREAK_P  expression                                          { $instr = SentenciasTransferencia.NewBreak(entorno.NULL,$expression.expr)}
 ;
 
 sentencia_continue returns [interfaces.Instruccion instr]
-    : CONTINUE_P                                                      { $instr = SentenciaTransferencia.NewContinue(entorno.VOID)}
+    : CONTINUE_P                                                      { $instr = SentenciasTransferencia.NewContinue(entorno.VOID)}
 
 ;
 
@@ -453,6 +451,7 @@ expression returns[interfaces.Expresion expr]
     | arraydata                                                 {$expr = $arraydata.expr} // datos del arreglo
     | tiposvars ':' ':' POW '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
     | tiposvars ':' ':' POWF '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,"pow",$opDe.expr,false, $tiposvars.tipo) }
+    | VEC_VACIO ':' ':' NEW_ '(' ')' { }
 
 ;
 

@@ -1,0 +1,8 @@
+main() {
+    let mut x = 0;
+
+    while x < 3 {
+        x = x + 1;
+        println!("numero: " + x);
+    }
+}

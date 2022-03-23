@@ -1,6 +1,7 @@
 package SentenciasCiclicas
 
 import (
+	"fmt"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 
@@ -20,7 +21,21 @@ func NewWhileInstruccion(condicion interfaces.Expresion, listaInstrucciones *arr
 }
 
 func (w WhileInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
+	var resultado entorno.TipoRetorno
 
+	for {
+		resultado = w.Condicion.ObtenerValor(ent)
 
-	return nil
+		if resultado.Valor != true {
+			// entTmp := entorno.NewEntorno("WHILE", &ent)
+			for _, s := range w.ListaInstrucciones.ToArray(){
+				s.(interfaces.Instruccion).Ejecutar(ent)
+				fmt.Printf("\nInstr While: %v\n", s)
+			}
+		} else {
+			break
+		}
+	}
+
+	return resultado.Valor
 }

@@ -14,7 +14,8 @@ const (
 	NULL							// 7
 	VOID							// 8
 	ARREGLO							// 9
-	OBJETO							// 10
+	VECTOR							// 10
+	OBJETO							// 11
 )
 
 const (

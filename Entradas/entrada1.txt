@@ -1,8 +1,8 @@
-main()
+fn main()
 {
 
-	int [] arr1 = new int[5];
-	int [][][] arr2 = {
+	i64 [] arr1 = new i64[5];
+	i64 [][][] arr2 = {
 		{{3,4}, {4,4}, {5,6}},
 		{{33,19}, {54,44}, {10,23}},
 		{{93,84}, {64,74}, {5,6}}
@@ -22,18 +22,18 @@ main()
 }
 
 
-void llamada(int a, int b) {
+fn llamada(i64 a, i64 b) {
 		println!("Valor a: " + a);
 		println!("Valor b: " + b);
-    if(true) {
-        int x= 100;
-        int z = multiplicacion(x, 5);
+    if true {
+        let muy x= 100;
+        let mut = multiplicacion(x, 5);
 		println!("Resultado: " + z);
     }
     return;
 }
 
-int multiplicacion(int g, int h){
+fn multiplicacion(i64 g, i64 h) -> i64 {
 		println!("Valor2: " + g);
 		println!("Valor2: " + h);
     println!("** Se llama a multiplicacion **");
