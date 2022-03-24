@@ -5,7 +5,6 @@ import (
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 	"p1/packages/Analizador/entorno/Simbolos"
-	"reflect"
 
 	arrayList "github.com/colegno/arraylist"
 )
@@ -31,19 +30,21 @@ func (a AccessoArr) ObtenerValor(ent entorno.Entorno) entorno.TipoRetorno {
 
 	simbol := ent.ObtenerSimbolo(a.Identificador)
 
-	// Valida si es de tipo arreglo
-	if reflect.TypeOf(simbol) != reflect.TypeOf(Simbolos.ObjetoArray{}) {
+	fmt.Printf("\n SIMBOLO ACCARR: %v \n", simbol)
 
-		fmt.Println("no es un arreglo")
-		return entorno.TipoRetorno{Valor: 0, Tipo: entorno.NULL}
-	}
+	// Valida si es de tipo arreglo
+	// if reflect.TypeOf(simbol) != reflect.TypeOf(Simbolos.ObjetoArray{}) {
+
+	// 	fmt.Println("no es un arreglo")
+	// 	return entorno.TipoRetorno{Valor: 0, Tipo: entorno.NULL}
+	// }
 
 	objetoArr := simbol.(Simbolos.ObjetoArray)
 
-	if objetoArr.ListaIntDimensiones.Len() != a.Dimensiones.Len() {
-		fmt.Println("Dimensiones no coinciden")
-		return entorno.TipoRetorno{Valor: 0, Tipo: entorno.NULL}
-	}
+	// if objetoArr.ListaIntDimensiones.Len() != a.Dimensiones.Len() {
+	// 	fmt.Println("Dimensiones no coinciden")
+	// 	return entorno.TipoRetorno{Valor: 0, Tipo: entorno.NULL}
+	// }
 
 	dimensiones := a.ObtenerIntDimensiones(ent) // Se obtiene la lista de enteros para las posiciones (Expresiones)
 

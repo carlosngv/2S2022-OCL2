@@ -104,7 +104,7 @@ instrucciones returns [*arrayList.List lista]
                                                                         for _, e := range listInt {
                                                                           $lista.Add(e.GetInstr())
                                                                         }
-                                                                    fmt.Printf("\ntipo %T",localctx.(*InstruccionesContext).GetE())
+
                                                                 }
 
 ;
@@ -302,7 +302,19 @@ declaracionIni returns [interfaces.Instruccion instr]
                                                                         columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
                                                                         $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, true, linea, columna)
                                                                      }
-    | LET MUT ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' listaExpresiones           { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo,$listaExpresiones.lista) }
+    | LET ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' VEC_VACIO ':' ':' NEW_ '(' ')'  { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo, false) }
+
+    | LET MUT ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' VEC_VACIO ':' ':' NEW_ '(' ')'  { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo, true) }
+
+    | LET ID '=' expression {
+        fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
+        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expression.expr,entorno.VOID, false)
+    }
+
+    | LET MUT ID '=' expression {
+        fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
+        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expression.expr,entorno.VOID, true)
+    }
 ;
 
 declaracion returns [interfaces.Instruccion instr]
@@ -351,9 +363,23 @@ tiposvars returns[entorno.TipoDato tipo]
 
 //SECCIÓN ARREGLOS
 dec_arr returns [interfaces.Instruccion instr]
-    // int [][][] ejemplo = new int[5]
-    // las dimensiones son llaves cuadradas vacías
-    : tiposvars  dimensiones ID '=' expression                  {$instr = Definicion.NewDeclaracionArray($dimensiones.tam,$ID.text,$expression.expr,$tiposvars.tipo)}
+    // decl1 -> let arr1: [ TYPE ; SIZE] = expr
+    // decl1 -> let mut arr1: [ TYPE ; SIZE] = expr
+    // decl2 -> let arr1 = expr         // Estos dos ultimos se realizan en la declaración normal
+    // decl2 -> let mut arr1 = expr
+
+    //: tiposvars  dimensiones ID '=' expression                  {$instr = Definicion.NewDeclaracionArray($dimensiones.tam,$ID.text,$expression.expr,$tiposvars.tipo)}
+
+    // DE MOMENTO OMITIR EL TAMAñO
+
+    : LET ID ':' '[' tiposvars ';' NUMBER ']' '=' expression {
+        num, _ := strconv.Atoi($NUMBER.text)
+        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expression.expr,$tiposvars.tipo, false)
+        }
+    | LET MUT ID ':' '[' tiposvars ';' NUMBER ']''=' expression  {
+        num, _ := strconv.Atoi($NUMBER.text)
+        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expression.expr,$tiposvars.tipo, true)
+    }
 ;
 
 
@@ -367,14 +393,16 @@ dimensiones returns [int tam]
 
 dimension
 
-    : '[' ']'
+    : '['  ']'
 ;
 
 
-
+// FUNCIONAL -> [32, 43, [434, 34], [434]] (Es el valor del array).
 arraydata returns [interfaces.Expresion expr]
-    : L_LLAVE listaExpresiones R_LLAVE                          {$expr = expresion2.NewValorArreglo($listaExpresiones.lista)}
+    : '[' listaExpresiones ']'                          {$expr = expresion2.NewValorArreglo($listaExpresiones.lista)}
 ;
+
+
 
 instancia returns[interfaces.Expresion expr]
         // new int [e][e][e]
@@ -408,6 +436,7 @@ instanciaClase returns[interfaces.Expresion expr]
 ;
 
 
+// arra1[2][3][4]
 accesoarr returns[interfaces.Expresion expr]
     : ID listanchos                                             {$expr = Accesos.NewAccessoArr($ID.text,$listanchos.lista)}
 ;
@@ -436,22 +465,19 @@ acceso  returns [interfaces.Expresion expr]
 
 
 
-/*
-    SECCION DE EXPRESSIONES ************************************************
- */
 
 
 
 
+// Sección Expresiones
 expression returns[interfaces.Expresion expr]
     : expr_rel                                                  {$expr = $expr_rel.expr}
     | expr_arit                                                 {$expr = $expr_arit.expr}
     | expr_log                                                 {$expr = $expr_log.expr}
     | instancia                                                 {$expr = $instancia.expr} // new int[4]
     | arraydata                                                 {$expr = $arraydata.expr} // datos del arreglo
-    | tiposvars ':' ':' POW '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
+    | tiposvars ':' ':' POW '(' opIz = expression ',' opDe = expression ')'     { $expr = expresion.NuevaOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
     | tiposvars ':' ':' POWF '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,"pow",$opDe.expr,false, $tiposvars.tipo) }
-    | VEC_VACIO ':' ':' NEW_ '(' ')' { }
 
 ;
 

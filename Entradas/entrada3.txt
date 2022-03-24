@@ -1,17 +1,17 @@
 fn main()
 {
 
-	i64 [] arr1 = new i64[5];
-	let arr = {4, 5, 6, 7};
-	i64 [][][] arr2 = {
-		{{3,4}, {4,4}, {5,6}},
-		{{33,19}, {54,44}, {10,23}},
-		{{93,84}, {64,74}, {5,6}}
-	};
+	let mut arr1: [i64; 5] = [4,5,6,7,8];
+	let arr2 = [
+		[[3,4], [4,4], [5,6]],
+		[[33,19], [54,44], [10,23]],
+		[[93,84], [64,74], [5,6]]
+    ];
 	println!("Arreglo 2: " + arr2[1][1][1]);
+    println!("Valor arr1 " + arr1[3]);
 
-	let valor1: String = "Hola";
-	let valor2: String = "adios";
+	let valor1 = "Hola";
+	let valor2 = "adios";
 	if(valor1>valor2) {
 		println!(valor1 + " es mas grande");
 	} else {
@@ -24,10 +24,9 @@ fn main()
 
 
 fn llamada(i64 a, i64 b) {
-		println!("Valor a: " + a);
-		println!("Valor b: " + b);
+
     if true {
-        let mut x = 100;
+        let mut x= 100;
         let mut z = multiplicacion(x, 5);
 		println!("Resultado: " + z);
     }
@@ -35,8 +34,8 @@ fn llamada(i64 a, i64 b) {
 }
 
 fn multiplicacion(i64 g, i64 h) -> i64 {
-		println!("Valor2: " + g);
-		println!("Valor2: " + h);
+	println!("Valor2: " + g);
+	println!("Valor2: " + h);
     println!("** Se llama a multiplicacion **");
     return a*b;
 }

@@ -1,12 +1,15 @@
 package utilities
 
 import (
+	"time"
+
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 )
 
 type CustomSyntaxError struct {
-	line, column int
-	msg          string
+	Linea, Columna   int
+	Msg          string
+	Time			 time.Time
 }
 
 type CustomErrorListener struct {
@@ -16,8 +19,9 @@ type CustomErrorListener struct {
 
 func (c *CustomErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line, column int, msg string, e antlr.RecognitionException) {
 	c.Errors = append(c.Errors, CustomSyntaxError{
-		line:   line,
-		column: column,
-		msg:    msg,
+		Linea:   line,
+		Columna: column,
+		Msg: msg,
+		Time: 	time.Now(),
 	})
 }

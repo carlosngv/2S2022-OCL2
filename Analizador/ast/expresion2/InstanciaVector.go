@@ -1,7 +1,7 @@
 package expresion2
 
 import (
-	"p1/packages/Analizador/ast/interfaces"
+	"p1/packages/Analizador"
 	"p1/packages/Analizador/entorno"
 
 	arrayList "github.com/colegno/arraylist"
@@ -10,7 +10,7 @@ import (
 type InstanciaVector struct {
 	ID 			string
 	Tipo        entorno.TipoDato
-	ListExp  	*arrayList.List // es una expresion con una lista de
+	EsMutable    	    bool
 }
 
 /*
@@ -24,11 +24,11 @@ type InstanciaVector struct {
 
 */
 
-func NewVector(id string, tipo entorno.TipoDato, list *arrayList.List) InstanciaVector {
+func NewVector(id string, tipo entorno.TipoDato, esMutable bool) InstanciaVector {
 	exp := InstanciaVector{
 		id,
 		tipo,
-		list,
+		esMutable,
 	}
 	return exp
 }
@@ -36,14 +36,25 @@ func NewVector(id string, tipo entorno.TipoDato, list *arrayList.List) Instancia
 func (p InstanciaVector) Ejecutar(ent entorno.Entorno) interface{} {
 
 
+	if !ent.ExisteSimbolo( p.ID ) {
+		nuevoError := Analizador.NewErrorSemantico(
+			0,
+			0,
+			"Error Semántico, la variable "+ p.ID +" ya está declarada.",
+		)
+		Analizador.ListaErrores.Add(nuevoError)
+		return nil
+	}
+
 	tempExp := arrayList.New()
 
-	for _, s := range p.ListExp.ToArray() {
-		tempExp.Add(s.(interfaces.Expresion).ObtenerValor(ent))
+	nuevoValor := entorno.TipoRetorno{
+		Valor: tempExp,
+		Tipo: p.Tipo,
 	}
 
 	return entorno.TipoRetorno{
 		Tipo:  entorno.VECTOR,
-		Valor: tempExp,
+		Valor: nuevoValor,
 	}
 }

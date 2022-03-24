@@ -80,7 +80,7 @@ func (f Funcion) Ejecutar(ent entorno.Entorno) interface{} {
 			}
 
 			valorRetorno := valorInstruccion.(entorno.TipoRetorno)
-			fmt.Printf("\n ValorRet: %v \n", valorRetorno)
+
 
 			if valorRetorno.Tipo != entorno.VOID {
 				compararTipos := retornoVal[tipoRetFuncion][valorRetorno.Tipo]

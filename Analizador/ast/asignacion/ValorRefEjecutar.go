@@ -1,7 +1,6 @@
 package asignacion
 
 import (
-	"fmt"
 	"p1/packages/Analizador/ast/expresion"
 	"p1/packages/Analizador/ast/expresion/Accesos"
 	"p1/packages/Analizador/entorno"
@@ -36,7 +35,7 @@ func (v ValorRefEjecutar) Ejecutar(ent entorno.Entorno, valor interface{}) inter
 		asignaObjeto.Ejecutar(*valorRef.Entorno)
 	}
 
-	fmt.Printf("%v", valorRef)
+
 
 	return nil
 }

@@ -26,6 +26,7 @@ type Declaracion struct {
 	Columna				int
 	Referencia          bool
 	EntornoRef          *entorno.Entorno
+	EsArreglo			bool
 }
 
 func NuevaDeclaracion(listaVars *arraylist.List, tipoVariables entorno.TipoDato) *Declaracion {

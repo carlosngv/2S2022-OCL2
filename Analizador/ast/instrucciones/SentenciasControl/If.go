@@ -1,7 +1,6 @@
 package SentenciasControl
 
 import (
-	"fmt"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 
@@ -28,7 +27,6 @@ func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
 	retornoCondicionPrincipal := i.Condicion.ObtenerValor(ent)
 
-	fmt.Printf(" \n valor %v \n", i)
 
 	if retornoCondicionPrincipal.Tipo != entorno.BOOLEAN {
 		//Analizador.Salida += "\ntipo no bool\n"

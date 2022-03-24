@@ -105,12 +105,12 @@ func (v ValorArreglo) ObtenerData(ent entorno.Entorno) (interface{}, entorno.Tip
 			// Se almacena el tipo del primer valor para comparar el tipo de los siguientes valores
 			if i == 0 {
 				TipoDatos = valorDato.Tipo
-			} else {
-				if TipoDatos != valorDato.Tipo {
-					fmt.Println("ERROR, tipo de datos no coinciden")
-					return nil, entorno.NULL
-				}
-			}
+			}   //else {
+				//if TipoDatos != valorDato.Tipo {
+				//	fmt.Println("ERROR, tipo de datos no coinciden")
+				//	return nil, entorno.NULL
+				//}
+				//}
 			s[i] = valorDato.Valor
 			continue
 		}
@@ -127,13 +127,13 @@ func (v ValorArreglo) ObtenerData(ent entorno.Entorno) (interface{}, entorno.Tip
 		if i == 0 {
 			TipoDatos = valorObjeto.Tipo
 			ListaIntDimensiones.AddAll(ObjectoArreglo.ListaIntDimensiones.ToArray())
-		} else {
-			if TipoDatos != valorObjeto.Tipo {
+		}  //else {
+			//if TipoDatos != valorObjeto.Tipo {
 
-				fmt.Println("Error4")
-				return nil, entorno.NULL
-			}
-		}
+			//	fmt.Println("Error4")
+			//	return nil, entorno.NULL
+			//}
+		//}
 
 		s[i] = ObjectoArreglo.Valores
 
@@ -148,15 +148,4 @@ func (v ValorArreglo) ObtenerData(ent entorno.Entorno) (interface{}, entorno.Tip
 
 	return objetoVal, entorno.ARREGLO
 
-}
-
-func (val ValorArreglo) dimensionArreglo(dato entorno.TipoDato) bool {
-	switch dato {
-	case entorno.INTEGER:
-	case entorno.BOOLEAN:
-	case entorno.STRING:
-	case entorno.FLOAT:
-		return false
-	}
-	return true
 }

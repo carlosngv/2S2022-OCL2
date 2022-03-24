@@ -29,7 +29,14 @@ type Output struct {
 	Output string
 }
 
+type ReporteErrores struct {
+	// Output
+	Output []utilities.CustomSyntaxError
+	Output2 []Analizador.ErrorSemantico
+}
+
 var output Output
+var listaErrores ReporteErrores
 
 
 var templates = template.Must(template.ParseGlob("templates/*"))
@@ -38,6 +45,16 @@ var templates = template.Must(template.ParseGlob("templates/*"))
 func Index(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "index", output)
 }
+
+func VistaErrores(w http.ResponseWriter, r *http.Request) {
+	if len(listaErrores.Output) > 0 {
+		templates.ExecuteTemplate(w, "errors", listaErrores.Output)
+	} else if len(listaErrores.Output2) > 0 {
+		templates.ExecuteTemplate(w, "errors", listaErrores.Output2)
+	}
+}
+
+
 
 
 func ProcessData(w http.ResponseWriter, r *http.Request) {
@@ -83,11 +100,19 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 
 	var listener *utilities.TreeShapeListener = utilities.NewTreeShapeListener()
 
+
+	listaErrores.Output = nil
 	if len(errores.Errors) == 0 {
 		antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+	}else{
+		antlr.ParseTreeWalkerDefault.Walk(listener, tree)
+		listaErrores.Output = errores.Errors
+		fmt.Printf("\nERRORES: %v\n", errores)
+
+		http.Redirect(w, r, "/errores", http.StatusMovedPermanently)
+		return
 	}
 
-	fmt.Printf("\nERRORES: %v\n", errores)
 
 	AST := listener.Ast // A partir del ast se puede acceder a los no terminales de las producciones
 
@@ -119,11 +144,16 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 	if Analizador.ListaErrores.Len() > 0 {
 		fmt.Printf("\nERRORES PROPIOS: %v\n", Analizador.ListaErrores)
 		Analizador.Salida = ""
+		var listaAux []Analizador.ErrorSemantico
 		for i := 0; i < Analizador.ListaErrores.Len(); i++ {
 			errorActual := Analizador.ListaErrores.GetValue(i)
+			listaAux = append(listaAux, errorActual.(Analizador.ErrorSemantico))
 			// Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
 			Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + " Linea " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Linea) + ", Columna " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Columna) + ".\n"
 		}
+		listaErrores.Output2 = listaAux
+		http.Redirect(w, r, "/errores", http.StatusMovedPermanently)
+		return
 	}
 
 	output.Output = Analizador.Salida
