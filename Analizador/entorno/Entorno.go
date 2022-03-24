@@ -43,6 +43,7 @@ func (ent *Entorno) ExisteSimbolo(identificador string) bool {
 
 func (ent *Entorno) AgregarSimbolo(identificador string, simbolo interface{}) {
 	ident := strings.ToLower(identificador)
+
 	ent.Tabla[ident] = simbolo
 }
 

@@ -108,6 +108,16 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 		for i := 0; i < dec.ListaVars.Len(); i++ {
 
 			varDeclarar := dec.ListaVars.GetValue(i).(expresion.Identificador)
+			nuevoItemTS := Analizador.TablaSimbolos{
+				varDeclarar.Identificador,
+				"Variable",
+				dec.TipoVariables,
+				ent.Nombre,
+				dec.Linea,
+				dec.Columna,
+			}
+
+			Analizador.ListaTablaSimbolos = append(Analizador.ListaTablaSimbolos, nuevoItemTS)
 
 			if ent.ExisteSimbolo(varDeclarar.Identificador) {
 				// TODO: ALMACENAR ERROR SINTACTICO
@@ -136,6 +146,8 @@ func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
 		}
 
 	}
+
+
 
 	return nil
 }

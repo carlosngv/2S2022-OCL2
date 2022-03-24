@@ -2,6 +2,7 @@ package Definicion
 
 import (
 	"fmt"
+	"p1/packages/Analizador"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 	"p1/packages/Analizador/entorno/Simbolos"
@@ -87,6 +88,19 @@ func (d DeclaracionArray) Ejecutar(ent entorno.Entorno) interface{} {
 	}
 
 	fmt.Printf("%v ", ent.Tabla)
+
+
+
+	nuevoItemTS := Analizador.TablaSimbolos{
+		d.Identificador,
+		"Arreglo",
+		d.Tipo,
+		ent.Nombre,
+		12,
+		32,
+	}
+
+	Analizador.ListaTablaSimbolos = append(Analizador.ListaTablaSimbolos, nuevoItemTS)
 
 	return nil
 

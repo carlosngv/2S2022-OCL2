@@ -34,16 +34,21 @@ type ReporteErrores struct {
 	Output []utilities.CustomSyntaxError
 	Output2 []Analizador.ErrorSemantico
 }
+type ReporteTS struct {
+	Output []Analizador.TablaSimbolos
+}
 
 var output Output
 var listaErrores ReporteErrores
-
 
 var templates = template.Must(template.ParseGlob("templates/*"))
 
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "index", output)
+}
+func VistaTS(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "ts", Analizador.ListaTablaSimbolos)
 }
 
 func VistaErrores(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +63,6 @@ func VistaErrores(w http.ResponseWriter, r *http.Request) {
 
 
 func ProcessData(w http.ResponseWriter, r *http.Request) {
-
 	var input string
 	if r.Method == "POST" {
 		input = r.FormValue("input")
@@ -113,7 +117,7 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
+	Analizador.ListaTablaSimbolos = []Analizador.TablaSimbolos{}
 	AST := listener.Ast // A partir del ast se puede acceder a los no terminales de las producciones
 
 	ENTORNO_GLOBAL := entorno.NewEntorno("Global", nil)

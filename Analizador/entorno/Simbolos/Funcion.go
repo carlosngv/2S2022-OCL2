@@ -3,6 +3,7 @@ package Simbolos
 import (
 	"fmt"
 
+	"p1/packages/Analizador"
 	"p1/packages/Analizador/ast/instrucciones"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
@@ -29,6 +30,17 @@ type Funcion struct {
 
 func NuevoFuncion(nombre string, listaParams *arraylist.List, listaInstrucciones *arraylist.List, tipo entorno.TipoDato, acceso entorno.TipoModAccess) Funcion {
 	funcSimbolo := entorno.NuevoSimboloFuncion(0, 0, nombre, tipo, listaParams)
+
+	nuevoItemTS := Analizador.TablaSimbolos{
+		nombre,
+		"Funcion",
+		tipo,
+		"Global",
+		12,
+		32,
+	}
+
+	Analizador.ListaTablaSimbolos = append(Analizador.ListaTablaSimbolos, nuevoItemTS)
 
 	return Funcion{
 		ListaInstrucciones: listaInstrucciones,
