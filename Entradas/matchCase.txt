@@ -1,5 +1,5 @@
 
-main()
+fn main()
 {
     let numero = 1;
     match numero {
