@@ -27,3 +27,12 @@ type TipoRetorno struct {
 	Tipo TipoDato
 	Valor interface{}
 }
+
+
+type Result3D struct {
+	Tipo 		TipoDato
+	Codigo 		string
+	Temporal 	string
+	EtiquetaV	string
+	EtiquetaF	string
+}

@@ -25,15 +25,3 @@ func NewReturn(tipo entorno.TipoDato, salida interfaces.Expresion) Return {
 		Salida: nil,
 	}
 }
-
-func (r Return) Ejecutar(ent entorno.Entorno) interface{} {
-
-	if r.Tipo == entorno.VOID {
-		return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
-	}
-
-	retExpresion := r.Salida.ObtenerValor(ent)
-
-	return retExpresion
-
-}

@@ -1,13 +1,9 @@
 package Simbolos
 
 import (
-	"fmt"
-
 	"p1/packages/Analizador"
-	"p1/packages/Analizador/ast/instrucciones"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
-	"reflect"
 
 	"github.com/colegno/arraylist"
 )
@@ -50,62 +46,34 @@ func NuevoFuncion(nombre string, listaParams *arraylist.List, listaInstrucciones
 	}
 }
 
-func (f Funcion) EjecutarParametros(ent entorno.Entorno, expresiones *arraylist.List, entRef *entorno.Entorno) bool {
-
-	declaraciones := f.ListaParamsDecl.Clone()
-
-	if declaraciones.Len() != expresiones.Len() {
-		fmt.Println("Error en variables")
-		return false
-	}
-
-	for i := 0; i < declaraciones.Len(); i++ {
-
-		pivoteDec := declaraciones.GetValue(i).(*instrucciones.Declaracion)
-		if pivoteDec.Referencia {
-			pivoteDec.EntornoRef = entRef
-		}
-		pivoteDec.ValorInicializacion = expresiones.GetValue(i).(interfaces.Expresion)
-
-		pivoteDec.Ejecutar(ent)
-	}
+func (f Funcion) EjecutarParametros(ent *entorno.Entorno, expresiones *arraylist.List, entRef *entorno.Entorno) bool {
 
 	return true
 }
 
-func (f Funcion) Ejecutar(ent entorno.Entorno) interface{} {
+func (f Funcion) Get3D(ent *entorno.Entorno) string {
+
+	etiquetaRetonro := Analizador.GeneradorGlobal.ObtenerEtiqueta()
+
+	ENTORNO_FUNCION := entorno.NewEntorno("Funcion", ent)
+
+	codigoFuncion := ""
+
+	codigoFuncion += "void " + f.Identificador + " {\n\n"
 
 	for i := 0; i < f.ListaInstrucciones.Len(); i++ {
 
-		instrPivote := f.ListaInstrucciones.GetValue(i).(interfaces.Instruccion)
-		valorInstruccion := instrPivote.Ejecutar(ent)
+		INSTR := f.ListaInstrucciones.GetValue(i)
 
-		tipoRetFuncion := f.Tipo
+		codigoINSTR := INSTR.(interfaces.Instruccion).Get3D(&ENTORNO_FUNCION)
 
-		/* El retoro de la función es diferente de VOID y el valor de instruccion es diferente de nil*/
-
-		if valorInstruccion != nil {
-
-			if reflect.TypeOf(valorInstruccion) != reflect.TypeOf(entorno.TipoRetorno{}) {
-				fmt.Println("Error en función, se esperaba un retorno valido")
-				return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: -1}
-			}
-
-			valorRetorno := valorInstruccion.(entorno.TipoRetorno)
-
-
-			if valorRetorno.Tipo != entorno.VOID {
-				compararTipos := retornoVal[tipoRetFuncion][valorRetorno.Tipo]
-
-				if compararTipos == entorno.NULL {
-					fmt.Println("Error tipos, se esperaba un retorno de igual tipo")
-					return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: -1}
-				}
-			}
-
-			return valorRetorno
-		}
-
+		codigoFuncion += Analizador.GeneradorGlobal.Tabular(codigoINSTR)
 	}
-	return entorno.TipoRetorno{Tipo: entorno.NULL, Valor: -1}
+
+	codigoFuncion += Analizador.GeneradorGlobal.TabularLinea(etiquetaRetonro+"\n", 1)
+	codigoFuncion += Analizador.GeneradorGlobal.TabularLinea("return\n", 1)
+
+	codigoFuncion += "}"
+
+	return codigoFuncion
 }

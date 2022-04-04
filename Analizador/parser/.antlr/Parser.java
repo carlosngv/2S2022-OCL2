@@ -1,4 +1,4 @@
-// Generated from /Users/carlosngv/Documents/U/OCL2/OCL2 - 1S2022/Proyecto 1/Analizador/parser/Parser.g4 by ANTLR 4.8
+// Generated from /Users/carlosngv/Documents/U/OCL2/OCL2 - 1S2022/Proyectos/Analizador/parser/Parser.g4 by ANTLR 4.8
 
 
     import "p1/packages/Analizador/ast"

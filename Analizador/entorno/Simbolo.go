@@ -20,6 +20,7 @@ type Simbolo struct {
 	EsFuncion     bool
 	ListaParams   *arraylist.List
 	EsMutable     bool
+	Posicion     int
 }
 
 /**
@@ -41,6 +42,7 @@ func NewSimboloIdentificador(linea int, columna int, identificador string) *Simb
 		EsFuncion:     false,
 		Valor:         nil,
 		EsReferencia:  false,
+		Posicion:     0,
 		EsMutable:     true,
 	}
 }
@@ -56,6 +58,7 @@ func NuevoSimboloIdentificadorValor(linea int, columna int, identificador string
 		Tipo:          dato,
 		EsReferencia:  false,
 		EsMutable:     esMutable,
+		Posicion:     0,
 	}
 	return e
 }
@@ -72,6 +75,7 @@ func NewSimboloObjeto(linea int, columna int, identificador string, tipoRet Tipo
 		ListaParams:   nil,
 		EsReferencia:  false,
 		EsMutable:     true,
+		Posicion:     0,
 	}
 	return e
 }
@@ -88,6 +92,7 @@ func NuevoSimboloFuncion(linea int, columna int, identificador string, tipoRet T
 		ListaParams:   listParametros,
 		EsReferencia:  false,
 		EsMutable:     true,
+		Posicion:     0,
 	}
 	return e
 }
@@ -103,6 +108,7 @@ func NewSimboloArreglo(linea int, columna int, identificador string, tipoDatos T
 		ListaParams:   nil,
 		EsReferencia:  false,
 		EsMutable:     true,
+		Posicion:     0,
 	}
 	return e
 }

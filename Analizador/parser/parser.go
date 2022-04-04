@@ -2197,7 +2197,6 @@ func (p *Parser) Instrucciones() (localctx IInstruccionesContext) {
 		localctx.(*InstruccionesContext).lista.Add(e.GetInstr())
 	}
 
-
 	return localctx
 }
 
@@ -5923,6 +5922,7 @@ func (p *Parser) DeclaracionIni() (localctx IDeclaracionIniContext) {
 			localctx.(*DeclaracionIniContext)._expression = _x
 		}
 
+		fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
 		localctx.(*DeclaracionIniContext).instr = Definicion.NewDeclaracionArray(0, (func() string {
 			if localctx.(*DeclaracionIniContext).Get_ID() == nil {
 				return ""
@@ -5960,6 +5960,7 @@ func (p *Parser) DeclaracionIni() (localctx IDeclaracionIniContext) {
 			localctx.(*DeclaracionIniContext)._expression = _x
 		}
 
+		fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
 		localctx.(*DeclaracionIniContext).instr = Definicion.NewDeclaracionArray(0, (func() string {
 			if localctx.(*DeclaracionIniContext).Get_ID() == nil {
 				return ""

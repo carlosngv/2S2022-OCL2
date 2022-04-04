@@ -1,7 +1,9 @@
 package instrucciones
 
 import (
+	"fmt"
 	"p1/packages/Analizador"
+	analizador "p1/packages/Analizador"
 	"p1/packages/Analizador/ast/expresion"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
@@ -56,102 +58,61 @@ func NuevaDeclaracionInicializacion(listaVars *arraylist.List, tipoVariables ent
 	}
 }
 
-func (dec *Declaracion) Ejecutar(ent entorno.Entorno) interface{} {
+func (dec *Declaracion) esInicializado() bool {
+	return dec.ValorInicializacion != nil
+}
 
-	/*
+func (dec *Declaracion) Get3D(ent *entorno.Entorno) string {
 
-		int a,b,c,d;
+	CODIGO_SALIDA := "\n\n\n"
+	puntero_ambito := Analizador.GeneradorGlobal.ObtenerTemporal()
 
-	*/
+	CODIGO_SALIDA += puntero_ambito + " = SP; \n"
 
 	if dec.esInicializado() {
-		if dec.ListaVars.Len() > 1 {
-			// TODO: ALMACENAR ERROR SINTACTICO
-			return nil
+
+		IDE := dec.ListaVars.GetValue(0).(expresion.Identificador)
+
+		resultadoExpr := dec.ValorInicializacion.Obtener3D(ent)
+
+		if resultadoExpr.Tipo != dec.TipoVariables {
+			return ""
 		}
 
+		CODIGO_SALIDA += resultadoExpr.Codigo
 
+		posicionRelativa := ent.Tamanio
 
-		var tipoResultante entorno.TipoDato
+		temporal := analizador.GeneradorGlobal.ObtenerTemporal()
 
-		retornoExpresion := dec.ValorInicializacion.ObtenerValor(ent)
+		CODIGO_SALIDA += "/* DECLARACIÓN DE VARIABLE INICIALIZADA*/\n"
+		CODIGO_SALIDA += temporal + " = SP + " + fmt.Sprint(posicionRelativa) + ";\n"
+		CODIGO_SALIDA += "Stack[(int)" + temporal + "] = " + resultadoExpr.Temporal
 
-		tipoExpresion := retornoExpresion.Tipo
-		tipoVariable := dec.TipoVariables
+		simbolo := entorno.NewSimboloIdentificador(0, 0, IDE.Identificador)
+		simbolo.Posicion = posicionRelativa
 
-		/*
-			Inferencia de tipos
-			En caso el tipo de la variable venga NULL, al tipo
-			resultante se le asigna el valor del tipo de la expresión.
-		*/
-		if tipoVariable != entorno.NULL {
-			tipoResultante = dec.TipoVariables
-		} else {
-			tipoResultante = tipoExpresion
-		}
+		ent.Tamanio = ent.Tamanio + 1
 
-		if tipoResultante != tipoExpresion {
-			nuevoError := Analizador.NewErrorSemantico(
-				dec.Linea,
-				dec.Columna,
-				"Error Semántico, el valor declarado en la variable " + dec.ListaVars.GetValue(0).(expresion.Identificador).Identificador + " no coincide con su tipo.",
-			)
-			Analizador.ListaErrores.Add(nuevoError)
-			return nil
-		}
+	} else {
 
-
-		if tipoResultante == entorno.NULL {
-			return nil
-		}
-
-		for i := 0; i < dec.ListaVars.Len(); i++ {
-
-			varDeclarar := dec.ListaVars.GetValue(i).(expresion.Identificador)
-			nuevoItemTS := Analizador.TablaSimbolos{
-				varDeclarar.Identificador,
-				"Variable",
-				dec.TipoVariables,
-				ent.Nombre,
-				dec.Linea,
-				dec.Columna,
-			}
-
-			Analizador.ListaTablaSimbolos = append(Analizador.ListaTablaSimbolos, nuevoItemTS)
-
-			if ent.ExisteSimbolo(varDeclarar.Identificador) {
-				// TODO: ALMACENAR ERROR SINTACTICO
-				nuevoError := Analizador.NewErrorSemantico(
-					dec.Linea,
-					dec.Columna,
-					"Error Semántico, la variable " + varDeclarar.Identificador + " ya está declarada.",
-				)
-				Analizador.ListaErrores.Add(nuevoError)
-				return nil
-
-			} else {
-
-				simboloTabla := entorno.NuevoSimboloIdentificadorValor(
-					0,
-					0,
-					varDeclarar.Identificador,
-					retornoExpresion.Valor,
-					tipoResultante,
-					dec.EsMutable)
-
-				ent.AgregarSimbolo(varDeclarar.Identificador, simboloTabla)
-
-			}
-
-		}
+		// VARIABLE NO INICIALIZADA, VALOR POR DEFECTO
 
 	}
 
-
-
-	return nil
+	return CODIGO_SALIDA
 }
 
-func (dec *Declaracion) esInicializado() bool {
-	return dec.ValorInicializacion != nil
+
+func (dec *Declaracion) valorPorDefecto(tipo entorno.TipoDato) entorno.Result3D {
+
+	resultado3D := entorno.Result3D{}
+
+	if tipo == entorno.INTEGER {
+		resultado3D.Codigo = ""
+		resultado3D.Tipo = entorno.INTEGER
+		resultado3D.Temporal = "0"
+	}
+
+	return resultado3D
 }

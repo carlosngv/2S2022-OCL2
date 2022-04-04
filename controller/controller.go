@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"p1/packages/Analizador"
+	"p1/packages/Analizador/ast/instrucciones"
+	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 	"p1/packages/Analizador/entorno/Simbolos"
 	"p1/packages/Analizador/parser"
@@ -63,21 +65,14 @@ func VistaErrores(w http.ResponseWriter, r *http.Request) {
 
 
 func ProcessData(w http.ResponseWriter, r *http.Request) {
+
 	var input string
+
 	if r.Method == "POST" {
 		input = r.FormValue("input")
 	}
 
 	w.Header().Set("content-type", "application/json")
-
-	// err := json.NewDecoder(r.Body).Decode(&input)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	json.NewEncoder(w).Encode(map[string]interface{}{"status": http.StatusBadRequest, "msg": "Error, revise los datos ingresados."})
-	// 	return
-	// }
-
-	// fmt.Println(input.Data)
 
 	errores := &utilities.CustomErrorListener{}
 	Analizador.ListaErrores = arraylist.New()
@@ -121,27 +116,67 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 	AST := listener.Ast // A partir del ast se puede acceder a los no terminales de las producciones
 
 	ENTORNO_GLOBAL := entorno.NewEntorno("Global", nil)
-	ListFunciones := arraylist.New()
 
 	for i := 0; i < AST.ListaInstrucciones.Len(); i++ {
 
 		r := AST.ListaInstrucciones.GetValue(i)
 		if r != nil {
-			if reflect.TypeOf(r) == reflect.TypeOf(Simbolos.Funcion{}) {
-				ListFunciones.Add(r.(Simbolos.Funcion))
-				ENTORNO_GLOBAL.AgregarFuncion(r.(Simbolos.Funcion).Identificador, r)
+			if reflect.TypeOf(r) == reflect.TypeOf(instrucciones.DefClase{}) {
+				def_CLASE := r.(instrucciones.DefClase)
+				def_CLASE.Get3D(&ENTORNO_GLOBAL)
 			}
 		}
+
 	}
 
-	for i := 0; i < ListFunciones.Len(); i++ {
-		funcion := ListFunciones.GetValue(i).(Simbolos.Funcion)
+	salir := false
+	CODIGO_MAIN := ""
+	CODIGO_FUNCIONES := "" // Son todas las funciones que vienen arriba del main generado.
 
-		if funcion.Identificador == "main" {
-			funcion.Ejecutar(ENTORNO_GLOBAL)
+	for _, element := range ENTORNO_GLOBAL.TablaClases {
+
+		pivotClass := element.(*entorno.Clase)
+
+		if salir {
+			break
+		}
+
+		for j := 0; j < pivotClass.Instrucciones.Len(); j++ {
+
+			buscar := pivotClass.Instrucciones.GetValue(j)
+
+			if (reflect.TypeOf(buscar) == reflect.TypeOf(Simbolos.Funcion{})) {
+
+				if buscar.(Simbolos.Funcion).Identificador == "main" {
+
+					CODIGO_FUNCIONES += CREAR_MAIN(*pivotClass, &ENTORNO_GLOBAL)
+
+					MAIN_FN := buscar.(Simbolos.Funcion)
+
+					for x := 0; x < MAIN_FN.ListaInstrucciones.Len(); x++ {
+						MAIN_FN_INSTR := MAIN_FN.ListaInstrucciones.GetValue(x)
+
+						CODIGO_TEMPORAL := MAIN_FN_INSTR.(interfaces.Instruccion).Get3D(&ENTORNO_GLOBAL)
+
+						CODIGO_MAIN += Analizador.GeneradorGlobal.Tabular(CODIGO_TEMPORAL)
+					}
+
+					salir = true
+					break
+				}
+			}
 		}
 
 	}
+
+	CODIGO_FINAL := ""
+
+	CODIGO_FINAL += Analizador.GeneradorGlobal.Encabezado()
+	CODIGO_FINAL += CODIGO_FUNCIONES
+	CODIGO_FINAL += "\n\nvoid main() {\n\n"
+	CODIGO_FINAL += CODIGO_MAIN
+	CODIGO_FINAL += "\treturn;\n"
+	CODIGO_FINAL += "}"
 
 
 
@@ -160,9 +195,44 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	output.Output = Analizador.Salida
+	output.Output = CODIGO_FINAL
 
-	fmt.Printf("\n %v \n", Analizador.Salida)
+	fmt.Printf("\n %v \n", output.Output)
 
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+
+func CREAR_MAIN(MAIN entorno.Clase, ent *entorno.Entorno) string {
+
+	codigo := ""
+
+	for x := 0; x < MAIN.Instrucciones.Len(); x++ {
+
+		r := MAIN.Instrucciones.GetValue(x)
+
+		if r != nil {
+			if reflect.TypeOf(r) == reflect.TypeOf(Simbolos.Funcion{}) {
+				func_ := r.(Simbolos.Funcion)
+
+				if !ent.ExisteFuncion(func_.Identificador) {
+					ent.AgregarFuncion(func_.Identificador, func_)
+
+					if func_.Identificador != "main" {
+						codigo += func_.Get3D(ent)
+					}
+
+				} else {
+					//ERROR
+				}
+			} else {
+				codigo += r.(interfaces.Instruccion).Get3D(ent)
+			}
+
+		}
+
+	}
+
+	return codigo
+
 }

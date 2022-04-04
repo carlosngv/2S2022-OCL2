@@ -10,6 +10,7 @@ type Entorno struct {
 	Tabla       map[string]interface{}
 	TablaFunciones map[string]interface{}
 	TablaClases    map[string]interface{}
+	Tamanio        int
 }
 
 func NewEntorno(nombre string, entAnterior *Entorno) Entorno {
@@ -20,7 +21,7 @@ func NewEntorno(nombre string, entAnterior *Entorno) Entorno {
 
 
 	en := Entorno{Nombre: nombre, EntAnterior: entAnterior, Tabla: Tabla, TablaFunciones: TablaFunciones,  TablaClases: TablaClases}
-
+	en.Tamanio = 0
 	return en
 
 }

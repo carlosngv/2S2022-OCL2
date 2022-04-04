@@ -1,6 +1,9 @@
 package SentenciasControl
 
 import (
+	"fmt"
+	"p1/packages/Analizador"
+	"p1/packages/Analizador/ast/expresion"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
 
@@ -23,88 +26,77 @@ func NewIfInstruccion(condicion interfaces.Expresion, listaInstruccionesPrincipa
 	}
 }
 
-func (i IfInstruccion) Ejecutar(ent entorno.Entorno) interface{} {
 
-	retornoCondicionPrincipal := i.Condicion.ObtenerValor(ent)
+func (ifInstr IfInstruccion) Get3D(ent *entorno.Entorno) string {
 
+	ETIQUETA_SALIDA := Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
-	if retornoCondicionPrincipal.Tipo != entorno.BOOLEAN {
-		//Analizador.Salida += "\ntipo no bool\n"
-		// TODO: Almacenar error sintáctico
-		return nil
-	}
+	RESULTADO_FINAL := entorno.Result3D{}
 
-	if retornoCondicionPrincipal.Valor.(bool) {
+	expresionOperacion := ifInstr.Condicion.(expresion.Operacion)
+	expresionOperacion.EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+	expresionOperacion.EtiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
-		entornoNuevoIf := entorno.NewEntorno("IF", &ent)
+	resultadoCondicion := ifInstr.Condicion.(expresion.Operacion).Obtener3D(ent)
 
-		for j := 0; j < i.ListaInstruccionesPrincipal.Len(); j++ {
+	RESULTADO_FINAL.Codigo += "/*****************INSTRUCCIÓN IF *****************/\n"
+	RESULTADO_FINAL.Codigo += resultadoCondicion.Codigo
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoCondicion.EtiquetaV)
 
-			instr := i.ListaInstruccionesPrincipal.GetValue(j).(interfaces.Instruccion)
+	RESULTADO_FINAL.Codigo += ifInstr.generarCodigoInstrucciones(ifInstr.ListaInstruccionesPrincipal, ent)
 
-			retorno := instr.Ejecutar(entornoNuevoIf)
-			if retorno != nil {
-				if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
-					return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
-				}
-			}
-		}
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;\n", ETIQUETA_SALIDA)
 
-	} else {
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoCondicion.EtiquetaF)
 
-		if i.ListaIfElse != nil {
-			for _, elseIf_instruccion := range i.ListaIfElse.ToArray() {
+	if ifInstr.ListaIfElse != nil {
 
-				nuevoIf := elseIf_instruccion.(IfInstruccion)
+		for i := 0; i < ifInstr.ListaIfElse.Len(); i++ {
 
-				retornoCondicionNuevoIf := nuevoIf.Condicion.ObtenerValor(ent)
+			IFNUEVO := ifInstr.ListaInstruccionesElse.GetValue(i).(IfInstruccion)
 
-				if retornoCondicionNuevoIf.Tipo != entorno.BOOLEAN {
-					return nil
-				}
+			NUEVO_CONDICION := IFNUEVO.Condicion.(expresion.Operacion)
+			NUEVO_CONDICION.EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+			NUEVO_CONDICION.EtiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
+			resultadoNuevaCondicion := expresionOperacion.Obtener3D(ent)
 
-				if retornoCondicionNuevoIf.Valor.(bool) {
+			RESULTADO_FINAL.Codigo += "\n\n"
+			RESULTADO_FINAL.Codigo += resultadoCondicion.Codigo
 
-					entornoNuevoElseIf := entorno.NewEntorno("Else if", &ent)
+			RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoNuevaCondicion.EtiquetaV)
 
-					for j := 0; j < nuevoIf.ListaInstruccionesPrincipal.Len(); j++ {
+			RESULTADO_FINAL.Codigo += ifInstr.generarCodigoInstrucciones(IFNUEVO.ListaInstruccionesPrincipal, ent)
 
-						instr := nuevoIf.ListaInstruccionesPrincipal.GetValue(j).(interfaces.Instruccion)
-
-						retorno := instr.Ejecutar(entornoNuevoElseIf)
-						if retorno != nil {
-							if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
-								return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
-							}
-						}
-					}
-
-					return nil
-				}
-
-			}
-		}
-
-		if i.ListaInstruccionesElse != nil {
-
-			entornoElseFinal := entorno.NewEntorno("entorno Else final", &ent)
-
-			for j := 0; j < i.ListaInstruccionesElse.Len(); j++ {
-
-				instr := i.ListaInstruccionesElse.GetValue(j).(interfaces.Instruccion)
-
-				retorno := instr.Ejecutar(entornoElseFinal)
-				if retorno != nil {
-					if retorno.(entorno.TipoRetorno).Tipo == entorno.VOID {
-						return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
-					}
-				}
-			}
+			RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;\n", ETIQUETA_SALIDA)
+			RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoNuevaCondicion.EtiquetaF)
 
 		}
 
 	}
 
-	return nil
+	if ifInstr.ListaInstruccionesElse != nil {
+		if ifInstr.ListaInstruccionesElse.Len() > 0 {
+
+			RESULTADO_FINAL.Codigo += "/*INSTRUCCIONES ELSE */\n"
+			RESULTADO_FINAL.Codigo += ifInstr.generarCodigoInstrucciones(ifInstr.ListaInstruccionesElse, ent)
+		}
+	}
+
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", ETIQUETA_SALIDA)
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("/**********************FIN IF *****************/")
+
+	return RESULTADO_FINAL.Codigo
+}
+
+func (ifInstr IfInstruccion) generarCodigoInstrucciones(lista *arrayList.List, ent *entorno.Entorno) string {
+
+	CODIGO_SALIDA := ""
+
+	for i := 0; i < lista.Len(); i++ {
+		INSTR := lista.GetValue(i)
+		CODIGO_SALIDA += INSTR.(interfaces.Instruccion).Get3D(ent)
+	}
+
+	return CODIGO_SALIDA
 }

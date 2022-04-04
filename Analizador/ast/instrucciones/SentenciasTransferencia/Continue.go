@@ -15,13 +15,3 @@ func NewContinue(tipo entorno.TipoDato) Continue {
 		Tipo:   tipo,
 	}
 }
-
-func (c Continue) Ejecutar(ent entorno.Entorno) interface{} {
-
-	if c.Tipo == entorno.VOID {
-		return entorno.TipoRetorno{Tipo: entorno.VOID, Valor: 0}
-	}
-
-	return c
-
-}

@@ -2,7 +2,6 @@ package instrucciones
 
 import (
 	"fmt"
-	"p1/packages/Analizador"
 	analizador "p1/packages/Analizador"
 	"p1/packages/Analizador/ast/interfaces"
 	"p1/packages/Analizador/entorno"
@@ -17,29 +16,60 @@ func NuevoImprimir(val interfaces.Expresion) Imprimir {
 	return e
 }
 
-func (p Imprimir) Ejecutar(ent entorno.Entorno) interface{} {
+func (imp Imprimir) Get3D(ent *entorno.Entorno) string {
 
-	retornoExpr := p.Expresiones.ObtenerValor(ent)
+	resultadoExpr := imp.Expresiones.Obtener3D(ent)
 
+	CODIGO_SALIDA := ""
 
-	/*
-		Validación &str
-		No imprime expresiones de tipo &str, se espera imprimir los otros tipos.
-	*/
-	if retornoExpr.Tipo == entorno.STRING2 {
-		nuevoError := Analizador.NewErrorSemantico(
-			3,
-			14,
-			"Error Semántico, el valor de tipo &str no puede imprimirse. Se sugiere utilizar la función nativa to_string()",
-		)
-		Analizador.ListaErrores.Add(nuevoError)
-		return  nil
+	if resultadoExpr.Tipo == entorno.NULL {
+		return ""
 	}
 
+	if resultadoExpr.Tipo == entorno.INTEGER {
 
-	conSalto := fmt.Sprintf("%v", retornoExpr.Valor)
-	conSalto = conSalto + "\n"
-	analizador.Salida += ">> " + conSalto
+		CODIGO_SALIDA += "/* IMPRIMIENDO INTEGER*/\n"
+		CODIGO_SALIDA += fmt.Sprintf("\"printf(\"%d\", (int)%s\"); \n", resultadoExpr.Temporal)
 
-	return nil
+	} else if resultadoExpr.Tipo == entorno.FLOAT {
+
+		CODIGO_SALIDA += "/* IMPRIMIENDO INTEGER*/\n"
+		CODIGO_SALIDA += fmt.Sprintf("\"printf(\"%f\", (float)%s\"); \n", resultadoExpr.Temporal)
+
+	} else if resultadoExpr.Tipo == entorno.STRING {
+
+		temporal1 := analizador.GeneradorGlobal.ObtenerTemporal()
+
+		CARACTER := analizador.GeneradorGlobal.ObtenerTemporal()
+		etiquetaCiclo := analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaChar := analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaAumento := analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaSalida := analizador.GeneradorGlobal.ObtenerEtiqueta()
+
+		CODIGO_SALIDA += resultadoExpr.Codigo
+		CODIGO_SALIDA += fmt.Sprintf("%s = %s; /*capturando direccion en heap*/\n", temporal1, resultadoExpr.Temporal)
+
+		CODIGO_SALIDA += fmt.Sprintf("%s: \n", etiquetaCiclo)
+		CODIGO_SALIDA += fmt.Sprintf("	%s = Heap[(int)%s]; /*tomando caracter*/\n", CARACTER, temporal1)
+
+		CODIGO_SALIDA += fmt.Sprintf("		if(%s != -1) goto %s; \n", CARACTER, etiquetaChar)
+		CODIGO_SALIDA += fmt.Sprintf("			%s = %s + 1; \n", temporal1, temporal1)
+		CODIGO_SALIDA += fmt.Sprintf("			%s = Heap[(int)%s]; /*tomando caracter*/\n", CARACTER, temporal1)
+		CODIGO_SALIDA += "printf(\"%d\", (char) " + CARACTER + ");\n"
+		CODIGO_SALIDA += fmt.Sprintf("			goto %s; \n", etiquetaAumento)
+
+		CODIGO_SALIDA += fmt.Sprintf("		%s: \n", etiquetaChar)
+		CODIGO_SALIDA += fmt.Sprintf("		if(%s == 0 ) goto %s; \n", CARACTER, etiquetaSalida)
+		CODIGO_SALIDA += "printf(\"%c\", (char) " + CARACTER + ");\n"
+
+		CODIGO_SALIDA += fmt.Sprintf("			%s: \n", etiquetaAumento)
+		CODIGO_SALIDA += fmt.Sprintf("			%s = %s + 1; \n", temporal1, temporal1)
+
+		CODIGO_SALIDA += fmt.Sprintf("			goto %s; \n", etiquetaCiclo)
+
+		CODIGO_SALIDA += fmt.Sprintf("%s: \n", etiquetaSalida)
+
+	}
+
+	return CODIGO_SALIDA
 }
