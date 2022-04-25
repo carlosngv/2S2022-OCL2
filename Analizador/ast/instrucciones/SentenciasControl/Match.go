@@ -2,6 +2,7 @@ package SentenciasControl
 
 import (
 	"p1/packages/Analizador/ast/interfaces"
+	"p1/packages/Analizador/entorno"
 
 	arrayList "github.com/colegno/arraylist"
 )
@@ -16,4 +17,9 @@ func NewMatchInstruccion(condicion interfaces.Expresion, listaCases *arrayList.L
 		Condicion:  condicion,
 		ListaCases: listaCases,
 	}
+}
+
+
+func (mc MatchInstruccion) Get3D(ent *entorno.Entorno) string {
+	return ""
 }

@@ -2,6 +2,7 @@ package SentenciasCiclicas
 
 import (
 	"p1/packages/Analizador/ast/interfaces"
+	"p1/packages/Analizador/entorno"
 
 	arrayList "github.com/colegno/arraylist"
 )
@@ -16,4 +17,8 @@ func NewWhileInstruccion(condicion interfaces.Expresion, listaInstrucciones *arr
 		Condicion:  condicion,
 		ListaInstrucciones: listaInstrucciones,
 	}
+}
+
+func (wh WhileInstruccion) Get3D(ent *entorno.Entorno) string {
+	return ""
 }

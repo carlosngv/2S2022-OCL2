@@ -2,6 +2,7 @@ package asignacion
 
 import (
 	"p1/packages/Analizador/ast/interfaces"
+	"p1/packages/Analizador/entorno"
 
 	"github.com/colegno/arraylist"
 )
@@ -18,4 +19,8 @@ func NewAsignacionObjeto(listaAccesos *arraylist.List, expr interfaces.Expresion
 
 func NewAsignacionObjetoValor(listaAccesos *arraylist.List, valor interface{}) AsignacionObjeto {
 	return AsignacionObjeto{ListaAccesos: listaAccesos, Valor: valor}
+}
+
+func (asignacion AsignacionObjeto) Get3D(ent *entorno.Entorno) string {
+	return ""
 }

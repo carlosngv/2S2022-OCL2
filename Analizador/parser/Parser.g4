@@ -12,7 +12,7 @@ options {
     import "p1/packages/Analizador/ast/expresion" // id, operacion, primitivo
     import "p1/packages/Analizador/ast/expresion/Accesos" // AccesoArreglo, AccesoObjeto
     import "p1/packages/Analizador/ast/expresion2" // Llamada
-    import "p1/packages/Analizador/ast/instrucciones" // print, declaracion, asignación
+    import "p1/packages/Analizador/ast/instrucciones" // print, declaracion, asignación, defClase
     import "p1/packages/Analizador/ast/asignacion" // asignación
     import "p1/packages/Analizador/ast/instrucciones/Definicion" // DefinicionArreglo, DefinicionObjeto
     import "p1/packages/Analizador/ast/instrucciones/SentenciasTransferencia"
@@ -34,27 +34,63 @@ options {
 
 
 start returns [ast.Ast  ast]
-    : listaFunciones                      { $ast = ast.NuevoAst( $listaFunciones.lista)}
+    : listaClases                           { $ast = ast.NewAst( $listaClases.lista)}
+    //| listaFunciones                      { $ast = ast.NewAst( $listaFunciones.lista)}
 ;
 
-listaFunciones returns [*arrayList.List lista]
+// Sección clases (Modulos)
+
+listaClases returns [*arrayList.List lista]
 @init{
     $lista = arrayList.New()
 }
-    : SUBLISTA =  listaFunciones funcionItem         {
-                                                $SUBLISTA.lista.Add( $funcionItem.instr)
+    : SUBLISTA =  listaClases clases        {
+                                                $SUBLISTA.lista.Add( $clases.instr)
                                                 $lista =  $SUBLISTA.lista
-    }
-    | funcionItem                                    { $lista.Add( $funcionItem.instr ) }
+                                            }
+    | clases                                { $lista.Add( $clases.instr ) }
 ;
+
+
+clases returns[interfaces.Instruccion instr]
+    : MOD_ ID cuerpoClase                              {$instr = instrucciones.NewDefClase($ID.text, $cuerpoClase.lista)}
+;
+
+
+
+cuerpoClase returns[*arrayList.List lista]
+    : L_LLAVE contenidoClase R_LLAVE                    {$lista = $contenidoClase.lista}
+    | L_LLAVE R_LLAVE                                   {$lista = arrayList.New()}
+;
+
+contenidoClase returns [*arrayList.List lista]
+@init{
+    $lista = arrayList.New()
+}
+    : SUBLISTA = contenidoClase itemClase              {
+                                                            $SUBLISTA.lista.Add( $itemClase.instr )
+                                                            $lista = $SUBLISTA.lista
+                                                        }
+    | itemClase                                         {
+                                                            $lista.Add( $itemClase.instr )
+                                                        }
+;
+
+itemClase returns[interfaces.Instruccion instr]
+    : funcionItem                               {$instr = $funcionItem.instr}
+    | declaracionIni       ';'                  {$instr = $declaracionIni.instr}
+    | declaracion          ';'                  {$instr = $declaracion.instr}
+;
+
+
 
 funcionItem   returns [ interfaces.Instruccion  instr]
 @init{ listaParams :=  arrayList.New() }
     : funcmain                                              { $instr =  $funcmain.instr}
-    | modaccess FN ID '(' ')' bloque                 { $instr = Simbolos.NuevoFuncion($ID.text,listaParams,$bloque.lista,entorno.VOID, $modaccess.modAccess)}
-    | modaccess FN ID '('  parametros ')' bloque     { $instr = Simbolos.NuevoFuncion($ID.text,$parametros.lista,$bloque.lista,entorno.VOID, $modaccess.modAccess)}
-    | modaccess FN ID '(' ')' '-' '>' tiposvars bloque                 { $instr = Simbolos.NuevoFuncion($ID.text,listaParams,$bloque.lista,$tiposvars.tipo, $modaccess.modAccess)}
-    | modaccess FN ID '('  parametros ')' '-' '>' tiposvars bloque     { $instr = Simbolos.NuevoFuncion($ID.text,$parametros.lista,$bloque.lista,$tiposvars.tipo, $modaccess.modAccess)}
+    | modaccess FN ID '(' ')' bloque                 { $instr = Simbolos.NewFuncion($ID.text,listaParams,$bloque.lista,entorno.VOID)}
+    | modaccess FN ID '('  parametros ')' bloque     { $instr = Simbolos.NewFuncion($ID.text,$parametros.lista,$bloque.lista,entorno.VOID)}
+    | modaccess FN ID '(' ')' '-' '>' tiposvars bloque                 { $instr = Simbolos.NewFuncion($ID.text,listaParams,$bloque.lista,$tiposvars.tipo)}
+    | modaccess FN ID '('  parametros ')' '-' '>' tiposvars bloque     { $instr = Simbolos.NewFuncion($ID.text,$parametros.lista,$bloque.lista,$tiposvars.tipo)}
 ;
 
 modaccess returns [entorno.TipoModAccess  modAccess]
@@ -66,28 +102,34 @@ parametros returns [*arrayList.List lista]
 @init{
 $lista =  arrayList.New()
 }
-    : sublista = parametros ','  tiposvars ID                     {
-                                                                    listaIdes := arrayList.New()
-                                                                    listaIdes.Add(expresion.NuevoIdentificador($ID.text))
-
-                                                                    decl := instrucciones.NuevaDeclaracion(listaIdes, $tiposvars.tipo)
-                                                                    $sublista.lista.Add( decl )
+    : sublista = parametros ','  parametro                      {
+                                                                    $sublista.lista.Add( $parametro.instr )
                                                                     $lista =  $sublista.lista
-
                                                                  }
-    | tiposvars ID                                               {
-                                                                    listaIdes := arrayList.New()
-                                                                    listaIdes.Add(expresion.NuevoIdentificador($ID.text))
-                                                                    decl := instrucciones.NuevaDeclaracion(listaIdes, $tiposvars.tipo)
-                                                                    $lista.Add( decl)
+    | parametro                                                 {
+                                                                    $lista.Add( $parametro.instr)
                                                                  }
 ;
+
+parametro returns [interfaces.Instruccion instr]
+    :   tiposvars ID                                            {
+                                                                    listaIdes := arrayList.New()
+                                                                    listaIdes.Add(expresion.NewIdentificador($ID.text))
+                                                                    $instr = instrucciones.NewDeclaracionParametro(listaIdes, $tiposvars.tipo,false)
+                                                                }
+    | '*' tiposvars ID                                          {
+                                                                    listaIdes := arrayList.New()
+                                                                    listaIdes.Add(expresion.NewIdentificador($ID.text))
+                                                                    $instr = instrucciones.NewDeclaracionParametro(listaIdes, $tiposvars.tipo,true)
+                                                                }
+;
+
 
 
 funcmain returns[interfaces.Instruccion instr]
 @init{ listaParams:= arrayList.New() }
     : FN MAIN '(' ')' bloque
-    { $instr = Simbolos.NuevoFuncion("main",listaParams,$bloque.lista,entorno.VOID, entorno.PRIVATE)}
+    { $instr = Simbolos.NewFuncion("main",listaParams,$bloque.lista,entorno.VOID)}
 ;
 
 
@@ -131,20 +173,20 @@ instruccion returns [interfaces.Instruccion instr]
 // SECCIón ASIGNACIóN
 
 asignacion returns[interfaces.Instruccion instr]
-    : ID '=' expression {$instr = asignacion.NuevaAsignacion($ID.text, $expression.expr, 0,0 )}
+    : ID '=' expresion {$instr = asignacion.NewAsignacion($ID.text, $expresion.expr, 0,0 )}
 ;
 
 // Sección If
 
 if_instr  returns [interfaces.Instruccion instr]
-    : IF_TOK expression  bloque                                        {
-        $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)
+    : IF_TOK expresion  bloque                                        {
+        $instr = SentenciasControl.NewIfInstruccion($expresion.expr,$bloque.lista,nil,nil)
     }
-    | IF_TOK  expression  bprincipal = bloque ELSE  belse = bloque      {
-        $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,nil,$belse.lista)
+    | IF_TOK  expresion  bprincipal = bloque ELSE  belse = bloque      {
+        $instr = SentenciasControl.NewIfInstruccion($expresion.expr,$bprincipal.lista,nil,$belse.lista)
     }
-    | IF_TOK  expression  bprincipal = bloque listaelseif ELSE  belse = bloque {
-        $instr = SentenciasControl.NewIfInstruccion($expression.expr,$bprincipal.lista,$listaelseif.lista,$belse.lista)
+    | IF_TOK  expresion  bprincipal = bloque listaelseif ELSE  belse = bloque {
+        $instr = SentenciasControl.NewIfInstruccion($expresion.expr,$bprincipal.lista,$listaelseif.lista,$belse.lista)
     }
 ;
 
@@ -159,14 +201,14 @@ listaelseif returns [*arrayList.List lista]
 ;
 
 else_if returns [interfaces.Instruccion instr]
-    : ELSE IF_TOK expression bloque   {$instr = SentenciasControl.NewIfInstruccion($expression.expr,$bloque.lista,nil,nil)}
+    : ELSE IF_TOK expresion bloque   {$instr = SentenciasControl.NewIfInstruccion($expresion.expr,$bloque.lista,nil,nil)}
 ;
 
 // Seccion match
 
 match_instr returns [interfaces.Instruccion instr]
-    : MATCH expression bloque_match  {
-            $instr = SentenciasControl.NewMatchInstruccion($expression.expr,$bloque_match.lista)
+    : MATCH expresion bloque_match  {
+            $instr = SentenciasControl.NewMatchInstruccion($expresion.expr,$bloque_match.lista)
         }
 ;
 
@@ -216,12 +258,12 @@ listaexpre_case returns [*arrayList.List lista]
 @init{
     $lista = arrayList.New()
 }
-    : LISTA = listaexpre_case OR_CASE expression{
-                                                    $LISTA.lista.Add( $expression.expr )
+    : LISTA = listaexpre_case OR_CASE expresion{
+                                                    $LISTA.lista.Add( $expresion.expr )
                                                     $lista =  $LISTA.lista
                                                 }
-| expression{
-        $lista.Add( $expression.expr )
+| expresion{
+        $lista.Add( $expresion.expr )
         }
 |  GUION_BAJO {
     $lista.Add("_")
@@ -232,8 +274,8 @@ listaexpre_case returns [*arrayList.List lista]
 // Sección while
 
 while_instr returns [interfaces.Instruccion instr]
-    : WHILE expression bloque  {
-            $instr = SentenciasCiclicas.NewWhileInstruccion($expression.expr,$bloque.lista)
+    : WHILE expresion bloque  {
+            $instr = SentenciasCiclicas.NewWhileInstruccion($expresion.expr,$bloque.lista)
         }
 ;
 
@@ -251,7 +293,7 @@ loop_instr returns [interfaces.Instruccion instr]
 // Seicción Print
 
 consola returns [interfaces.Instruccion instr]
-    : PRINTLN LP expression RP   {$instr = instrucciones.NuevoImprimir($expression.expr)}
+    : PRINTLN LP expresion RP   {$instr = instrucciones.NewImprimir($expresion.expr)}
 ;
 
 
@@ -261,76 +303,76 @@ consola returns [interfaces.Instruccion instr]
 
 llamada returns [interfaces.Instruccion instr, interfaces.Expresion expr]
     : ID '(' ')'                                                    {
-                                                                        $instr = expresion2.NuevaLlamada($ID.text, arrayList.New())
-                                                                        $expr = expresion2.NuevaLlamada($ID.text, arrayList.New())}
+                                                                        $instr = expresion2.NewLlamada($ID.text, arrayList.New())
+                                                                        $expr = expresion2.NewLlamada($ID.text, arrayList.New())}
     | ID '(' listaExpresiones ')'                                   {
-                                                                        $instr = expresion2.NuevaLlamada($ID.text, $listaExpresiones.lista)
-                                                                        $expr = expresion2.NuevaLlamada($ID.text, $listaExpresiones.lista)}
+                                                                        $instr = expresion2.NewLlamada($ID.text, $listaExpresiones.lista)
+                                                                        $expr = expresion2.NewLlamada($ID.text, $listaExpresiones.lista)}
 ;
 
 listaExpresiones returns [*arrayList.List lista]
 @init{
     $lista = arrayList.New()
 }
-    : LISTA = listaExpresiones ',' expression                        {
-                                                                        $LISTA.lista.Add( $expression.expr )
+    : LISTA = listaExpresiones ',' expresion                        {
+                                                                        $LISTA.lista.Add( $expresion.expr )
                                                                         $lista =  $LISTA.lista
                                                                      }
-    | expression                                                    {
-                                                                        $lista.Add( $expression.expr )
+    | expresion                                                    {
+                                                                        $lista.Add( $expresion.expr )
                                                                      }
 ;
 
 declaracionIni returns [interfaces.Instruccion instr]
-    : LET listides '=' expression                                    {
-                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
-                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
-                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista, entorno.NULL,$expression.expr, false, linea, columna)
+    : LET listides '=' expresion                                    {
+                                                                        //linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        //columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NewDeclaracionInicializacion($listides.lista, entorno.NULL ,$expresion.expr)
                                                                      }
-    | LET listides DOSPUNTOS tiposvars '=' expression                {
-                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
-                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
-                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, false, linea, columna)
+    | LET listides DOSPUNTOS tiposvars '=' expresion                {
+                                                                        //linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        //columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NewDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expresion.expr)
                                                                      }
-    | LET MUT listides   '=' expression                              {
-                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
-                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
-                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista, entorno.NULL,$expression.expr, true, linea, columna)
+    | LET MUT listides   '=' expresion                              {
+                                                                        //linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                        //columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NewDeclaracionInicializacion($listides.lista,entorno.NULL,$expresion.expr)
                                                                      }
-    | LET MUT listides DOSPUNTOS tiposvars  '=' expression           {
-                                                                        linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
-                                                                        columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
-                                                                        $instr = instrucciones.NuevaDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expression.expr, true, linea, columna)
+    | LET MUT listides DOSPUNTOS tiposvars  '=' expresion           {
+                                                                       // linea := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetLine()
+                                                                       // columna := localctx.(*DeclaracionIniContext).Get_listides().GetStart().GetColumn()
+                                                                        $instr = instrucciones.NewDeclaracionInicializacion($listides.lista,$tiposvars.tipo,$expresion.expr)
                                                                      }
     | LET ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' VEC_VACIO ':' ':' NEW_ '(' ')'  { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo, false) }
 
     | LET MUT ID DOSPUNTOS VEC_VACIO '<' tiposvars  '>' '=' VEC_VACIO ':' ':' NEW_ '(' ')'  { $instr = expresion2.NewVector($ID.text,$tiposvars.tipo, true) }
 
-    | LET ID '=' expression {
+    | LET ID '=' expresion {
         fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
-        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expression.expr,entorno.VOID, false)
+        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expresion.expr,entorno.VOID, false)
     }
 
-    | LET MUT ID '=' expression {
+    | LET MUT ID '=' expresion {
         fmt.Println("\n DECL ARRAY EN DECLARACIONINI")
-        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expression.expr,entorno.VOID, true)
+        $instr = Definicion.NewDeclaracionArray(0,$ID.text,$expresion.expr,entorno.VOID, true)
     }
 ;
 
 declaracion returns [interfaces.Instruccion instr]
     : tiposvars listides                                            {
-                                                                        $instr = instrucciones.NuevaDeclaracion($listides.lista,$tiposvars.tipo)
+                                                                        $instr = instrucciones.NewDeclaracion($listides.lista,$tiposvars.tipo)
                                                                     }
 ;
 
 retorno returns [interfaces.Instruccion instr]
     : RETURN_P                                                      { $instr = SentenciasTransferencia.NewReturn(entorno.VOID,nil)}
-    | RETURN_P  expression                                          { $instr = SentenciasTransferencia.NewReturn(entorno.NULL,$expression.expr)}
+    | RETURN_P  expresion                                          { $instr = SentenciasTransferencia.NewReturn(entorno.NULL,$expresion.expr)}
 ;
 
 sentencia_break returns [interfaces.Instruccion instr]
     : BREAK_P                                                      { $instr = SentenciasTransferencia.NewBreak(entorno.VOID,nil)}
-    | BREAK_P  expression                                          { $instr = SentenciasTransferencia.NewBreak(entorno.NULL,$expression.expr)}
+    | BREAK_P  expresion                                          { $instr = SentenciasTransferencia.NewBreak(entorno.NULL,$expresion.expr)}
 ;
 
 sentencia_continue returns [interfaces.Instruccion instr]
@@ -343,10 +385,10 @@ sentencia_continue returns [interfaces.Instruccion instr]
 listides returns [*arrayList.List lista]
   @init{  $lista =  arrayList.New() }
     : sub = listides ',' ID                                     {
-                                                                    $sub.lista.Add(expresion.NuevoIdentificador($ID.text))
+                                                                    $sub.lista.Add(expresion.NewIdentificador($ID.text))
                                                                     $lista = $sub.lista
                                                                 }
-    | ID                                                        {$lista.Add(expresion.NuevoIdentificador($ID.text))}
+    | ID                                                        {$lista.Add(expresion.NewIdentificador($ID.text))}
 ;
 
 tiposvars returns[entorno.TipoDato tipo]
@@ -368,17 +410,17 @@ dec_arr returns [interfaces.Instruccion instr]
     // decl2 -> let arr1 = expr         // Estos dos ultimos se realizan en la declaración normal
     // decl2 -> let mut arr1 = expr
 
-    //: tiposvars  dimensiones ID '=' expression                  {$instr = Definicion.NewDeclaracionArray($dimensiones.tam,$ID.text,$expression.expr,$tiposvars.tipo)}
+    //: tiposvars  dimensiones ID '=' expresion                  {$instr = Definicion.NewDeclaracionArray($dimensiones.tam,$ID.text,$expresion.expr,$tiposvars.tipo)}
 
     // DE MOMENTO OMITIR EL TAMAñO
 
-    : LET ID ':' '[' tiposvars ';' NUMBER ']' '=' expression {
+    : LET ID ':' '[' tiposvars ';' NUMBER ']' '=' expresion {
         num, _ := strconv.Atoi($NUMBER.text)
-        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expression.expr,$tiposvars.tipo, false)
+        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expresion.expr,$tiposvars.tipo, false)
         }
-    | LET MUT ID ':' '[' tiposvars ';' NUMBER ']''=' expression  {
+    | LET MUT ID ':' '[' tiposvars ';' NUMBER ']''=' expresion  {
         num, _ := strconv.Atoi($NUMBER.text)
-        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expression.expr,$tiposvars.tipo, true)
+        $instr = Definicion.NewDeclaracionArray(num,$ID.text,$expresion.expr,$tiposvars.tipo, true)
     }
 ;
 
@@ -421,13 +463,13 @@ listanchos returns[*arrayList.List lista]
 ;
 
 ancho   returns [interfaces.Expresion expr]
-    :   '[' expression ']'                                                  {$expr = $expression.expr}
+    :   '[' expresion ']'                                                  {$expr = $expresion.expr}
 ;
 
 // SECCIÓN CLASES
 
 dec_objeto returns[interfaces.Instruccion instr]
-    : ID listides '=' expression                                {$instr = Definicion.NewDeclararObjeto( $ID.text, $listides.lista, $expression.expr)}
+    : ID listides '=' expresion                                {$instr = Definicion.NewDeclararObjeto( $ID.text, $listides.lista, $expresion.expr)}
 ;
 
 
@@ -457,7 +499,7 @@ listaAccesos returns[*arrayList.List lista]
 ;
 
 acceso  returns [interfaces.Expresion expr]
-    : ID                                        { $expr = expresion.NuevoIdentificador($ID.text)}
+    : ID                                        { $expr = expresion.NewIdentificador($ID.text)}
     | accesoarr                                 { $expr = $accesoarr.expr}
 ;
 
@@ -470,34 +512,34 @@ acceso  returns [interfaces.Expresion expr]
 
 
 // Sección Expresiones
-expression returns[interfaces.Expresion expr]
+expresion returns[interfaces.Expresion expr]
     : expr_rel                                                  {$expr = $expr_rel.expr}
     | expr_arit                                                 {$expr = $expr_arit.expr}
     | expr_log                                                 {$expr = $expr_log.expr}
     | instancia                                                 {$expr = $instancia.expr} // new int[4]
     | arraydata                                                 {$expr = $arraydata.expr} // datos del arreglo
-    | tiposvars ':' ':' POW '(' opIz = expression ',' opDe = expression ')'     { $expr = expresion.NuevaOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
-    | tiposvars ':' ':' POWF '(' opIz = expression ',' opDe = expression ')'    { $expr = expresion.NuevaOperacion($opIz.expr,"pow",$opDe.expr,false, $tiposvars.tipo) }
+    | tiposvars ':' ':' POW '(' opIz = expresion ',' opDe = expresion ')'     { $expr = expresion.NewOperacion($opIz.expr,$POW.text,$opDe.expr,false, $tiposvars.tipo) }
+    | tiposvars ':' ':' POWF '(' opIz = expresion ',' opDe = expresion ')'    { $expr = expresion.NewOperacion($opIz.expr,"pow",$opDe.expr,false, $tiposvars.tipo) }
 
 ;
 
 expr_rel returns[interfaces.Expresion expr]
-    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_arit  {$expr = $expr_arit.expr}
 ;
 
 expr_log returns[interfaces.Expresion expr]
-    : '!' opU = expr_log {$expr = expresion.NuevaOperacion($opU.expr,"!",nil,true, entorno.NULL)}
-    | opIz = expr_log op=( '||' | '&&') opDe = expr_log {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    : '!' opU = expr_log {$expr = expresion.NewOperacion($opU.expr,"!",nil,true, entorno.NULL)}
+    | opIz = expr_log op=( '||' | '&&') opDe = expr_log {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_rel  {$expr = $expr_rel.expr}
 ;
 
 expr_arit returns[interfaces.Expresion expr]
-    : '-' opU = expression                                      {$expr = expresion.NuevaOperacion($opU.expr,"-",nil,true, entorno.NULL)}
-    | opIz = expr_arit op=('*'|'/'| MOD) opDe = expr_arit       {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
-    | opIz = expr_arit op=('+'|'-') opDe = expr_arit            {$expr = expresion.NuevaOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    : '-' opU = expresion                                      {$expr = expresion.NewOperacion($opU.expr,"-",nil,true, entorno.NULL)}
+    | opIz = expr_arit op=('*'|'/'| MOD) opDe = expr_arit       {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    | opIz = expr_arit op=('+'|'-') opDe = expr_arit            {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_valor                                                {$expr = $expr_valor.expr}
-    | LP expression RP                                          {$expr = $expression.expr}
+    | LP expresion RP                                          {$expr = $expresion.expr}
 ;
 
 expr_valor returns[interfaces.Expresion expr]
@@ -514,56 +556,56 @@ primitivo returns[interfaces.Expresion expr]
                                                                     if err!= nil{
                                                                         fmt.Println(err)
                                                                     }
-                                                                    $expr = expresion.NuevoPrimitivo(num,entorno.INTEGER)
+                                                                    $expr = expresion.NewPrimitivo(num,entorno.INTEGER)
                                                                 }
     |USIZE                                                      {
                                                                     num,err := strconv.Atoi($USIZE.text)
                                                                     if err!= nil{
                                                                         fmt.Println(err)
                                                                     }
-                                                                    $expr = expresion.NuevoPrimitivo(num,entorno.USIZE)
+                                                                    $expr = expresion.NewPrimitivo(num,entorno.USIZE)
                                                                 }
     | FLOAT                                                     {
                                                                      num,err := strconv.ParseFloat($FLOAT.text,64)
                                                                      if err!= nil{
                                                                          fmt.Println(err)
                                                                      }
-                                                                     $expr = expresion.NuevoPrimitivo(num,entorno.FLOAT)
+                                                                     $expr = expresion.NewPrimitivo(num,entorno.FLOAT)
 
                                                                 }
 
     | STRING                                                    {
                                                                     str:= $STRING.text[1:len($STRING.text)-1]
-                                                                    $expr = expresion.NuevoPrimitivo(str,entorno.STRING)
+                                                                    $expr = expresion.NewPrimitivo(str,entorno.STRING)
                                                                 }
     | CHAR                                                      {
                                                                     str:= $CHAR.text[1:len($CHAR.text)-1]
-                                                                    $expr = expresion.NuevoPrimitivo(str,entorno.CHAR)
+                                                                    $expr = expresion.NewPrimitivo(str,entorno.CHAR)
                                                                 }
 
-    | ID                                                        { $expr = expresion.NuevoIdentificador($ID.text)}
+    | ID                                                        { $expr = expresion.NewIdentificador($ID.text)}
 
-    | TRUE                                                      { $expr = expresion.NuevoPrimitivo(true,entorno.BOOLEAN) }
-    | FALSE                                                     { $expr = expresion.NuevoPrimitivo(false,entorno.BOOLEAN) }
+    | TRUE                                                      { $expr = expresion.NewPrimitivo(true,entorno.BOOLEAN) }
+    | FALSE                                                     { $expr = expresion.NewPrimitivo(false,entorno.BOOLEAN) }
     | ID '.' ABS '(' ')' {
         linea := localctx.(*PrimitivoContext).ABS().GetSymbol().GetLine()
 		columna := localctx.(*PrimitivoContext).ABS().GetSymbol().GetColumn()
-        $expr = funcionesNativas.NuevoValorAbs($ID.text, linea, columna)
+        $expr = funcionesNativas.NewValorAbs($ID.text, linea, columna)
     }
     | ID '.' SQRT '(' ')' {
         linea := localctx.(*PrimitivoContext).SQRT().GetSymbol().GetLine()
 		columna := localctx.(*PrimitivoContext).SQRT().GetSymbol().GetColumn()
-        $expr = funcionesNativas.NuevoValorSqrt($ID.text, linea, columna)
+        $expr = funcionesNativas.NewValorSqrt($ID.text, linea, columna)
     }
     | ID '.' TO_STRING '(' ')' {
         linea := localctx.(*PrimitivoContext).TO_STRING().GetSymbol().GetLine()
 		columna := localctx.(*PrimitivoContext).TO_STRING().GetSymbol().GetColumn()
-        $expr = funcionesNativas.NuevoValorStr($ID.text, linea, columna)
+        $expr = funcionesNativas.NewValorStr($ID.text, linea, columna)
     }
     | ID '.' CLONE '(' ')' {
         linea := localctx.(*PrimitivoContext).CLONE().GetSymbol().GetLine()
 		columna := localctx.(*PrimitivoContext).CLONE().GetSymbol().GetColumn()
-        $expr = funcionesNativas.NuevoValorClone($ID.text, linea, columna)
+        $expr = funcionesNativas.NewValorClone($ID.text, linea, columna)
     }
 
 ;

@@ -12,15 +12,15 @@ type Simbolo struct {
 	Linea         int
 	Columna       int
 	Identificador string
-	Valor         interface{}
 	EsReferencia  bool
 	Referencia    interface{}
 	Tipo          TipoDato
 	Constante     bool
 	EsFuncion     bool
 	ListaParams   *arraylist.List
-	EsMutable     bool
 	Posicion     int
+
+	Temporal_REF string
 }
 
 /**
@@ -28,9 +28,7 @@ type Simbolo struct {
  * @param       identificador  -> Identificador del Simbolo.
  */
 /*
-
 	int d =  x + y;
-
 */
 
 func NewSimboloIdentificador(linea int, columna int, identificador string) *Simbolo {
@@ -40,25 +38,21 @@ func NewSimboloIdentificador(linea int, columna int, identificador string) *Simb
 		Identificador: identificador,
 		Constante:     false,
 		EsFuncion:     false,
-		Valor:         nil,
-		EsReferencia:  false,
 		Posicion:     0,
-		EsMutable:     true,
+		EsReferencia:  false,
 	}
 }
 
-func NuevoSimboloIdentificadorValor(linea int, columna int, identificador string, valor interface{}, dato TipoDato, esMutable bool) Simbolo {
+func NewSimboloIdentificadorValor(linea int, columna int, identificador string, dato TipoDato) Simbolo {
 	e := Simbolo{
 		Linea:         linea,
 		Columna:       columna,
 		Identificador: identificador,
 		Constante:     false,
 		EsFuncion:     false,
-		Valor:         valor,
+		Posicion:     0,
 		Tipo:          dato,
 		EsReferencia:  false,
-		EsMutable:     esMutable,
-		Posicion:     0,
 	}
 	return e
 }
@@ -70,29 +64,25 @@ func NewSimboloObjeto(linea int, columna int, identificador string, tipoRet Tipo
 		Identificador: identificador,
 		Constante:     false,
 		EsFuncion:     true,
-		Valor:         nil,
+		Posicion:     0,
 		Tipo:          tipoRet,
 		ListaParams:   nil,
 		EsReferencia:  false,
-		EsMutable:     true,
-		Posicion:     0,
 	}
 	return e
 }
 
-func NuevoSimboloFuncion(linea int, columna int, identificador string, tipoRet TipoDato, listParametros *arraylist.List) Simbolo {
+func NewSimboloFuncion(linea int, columna int, identificador string, tipoRet TipoDato, listParametros *arraylist.List) Simbolo {
 	e := Simbolo{
 		Linea:         linea,
 		Columna:       columna,
 		Identificador: identificador,
 		Constante:     false,
 		EsFuncion:     true,
-		Valor:         nil,
+		Posicion:     0,
 		Tipo:          tipoRet,
 		ListaParams:   listParametros,
 		EsReferencia:  false,
-		EsMutable:     true,
-		Posicion:     0,
 	}
 	return e
 }
@@ -103,12 +93,10 @@ func NewSimboloArreglo(linea int, columna int, identificador string, tipoDatos T
 		Identificador: identificador,
 		Constante:     false,
 		EsFuncion:     true,
-		Valor:         nil,
+		Posicion:     0,
 		Tipo:          tipoDatos,
 		ListaParams:   nil,
 		EsReferencia:  false,
-		EsMutable:     true,
-		Posicion:     0,
 	}
 	return e
 }

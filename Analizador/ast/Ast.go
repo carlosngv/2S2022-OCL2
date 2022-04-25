@@ -6,7 +6,7 @@ type Ast struct {
 	ListaInstrucciones *arrayList.List
 }
 
-func NuevoAst(lista *arrayList.List) Ast {
+func NewAst(lista *arrayList.List) Ast {
 	ast := Ast{ListaInstrucciones: lista}
 	return ast
 }

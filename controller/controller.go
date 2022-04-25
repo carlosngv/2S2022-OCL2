@@ -11,7 +11,6 @@ import (
 	"p1/packages/Analizador/parser"
 	"p1/packages/utilities"
 	"reflect"
-	"strconv"
 	"text/template"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
@@ -113,6 +112,7 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Analizador.ListaTablaSimbolos = []Analizador.TablaSimbolos{}
+	Analizador.GeneradorGlobal.Reiniciar()
 	AST := listener.Ast // A partir del ast se puede acceder a los no terminales de las producciones
 
 	ENTORNO_GLOBAL := entorno.NewEntorno("Global", nil)
@@ -128,6 +128,7 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+
 
 	salir := false
 	CODIGO_MAIN := ""
@@ -173,6 +174,7 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 
 	CODIGO_FINAL += Analizador.GeneradorGlobal.Encabezado()
 	CODIGO_FINAL += CODIGO_FUNCIONES
+	CODIGO_FINAL += Analizador.GeneradorGlobal.Funciones + "\n"
 	CODIGO_FINAL += "\n\nvoid main() {\n\n"
 	CODIGO_FINAL += CODIGO_MAIN
 	CODIGO_FINAL += "\treturn;\n"
@@ -180,24 +182,24 @@ func ProcessData(w http.ResponseWriter, r *http.Request) {
 
 
 
-	if Analizador.ListaErrores.Len() > 0 {
-		fmt.Printf("\nERRORES PROPIOS: %v\n", Analizador.ListaErrores)
-		Analizador.Salida = ""
-		var listaAux []Analizador.ErrorSemantico
-		for i := 0; i < Analizador.ListaErrores.Len(); i++ {
-			errorActual := Analizador.ListaErrores.GetValue(i)
-			listaAux = append(listaAux, errorActual.(Analizador.ErrorSemantico))
-			// Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
-			Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + " Linea " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Linea) + ", Columna " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Columna) + ".\n"
-		}
-		listaErrores.Output2 = listaAux
-		http.Redirect(w, r, "/errores", http.StatusMovedPermanently)
-		return
-	}
+	// if Analizador.ListaErrores.Len() > 0 {
+	// 	fmt.Printf("\nERRORES PROPIOS: %v\n", Analizador.ListaErrores)
+	// 	Analizador.Salida = ""
+	// 	var listaAux []Analizador.ErrorSemantico
+	// 	for i := 0; i < Analizador.ListaErrores.Len(); i++ {
+	// 		errorActual := Analizador.ListaErrores.GetValue(i)
+	// 		listaAux = append(listaAux, errorActual.(Analizador.ErrorSemantico))
+	// 		// Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + "\n"
+	// 		Analizador.Salida += ">> " + errorActual.(Analizador.ErrorSemantico).Msg + " Linea " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Linea) + ", Columna " + strconv.Itoa(errorActual.(Analizador.ErrorSemantico).Columna) + ".\n"
+	// 	}
+	// 	listaErrores.Output2 = listaAux
+	// 	http.Redirect(w, r, "/errores", http.StatusMovedPermanently)
+	// 	return
+	// }
 
 	output.Output = CODIGO_FINAL
 
-	fmt.Printf("\n %v \n", output.Output)
+	//fmt.Printf("\n %v \n", CODIGO_FINAL)
 
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
@@ -217,14 +219,10 @@ func CREAR_MAIN(MAIN entorno.Clase, ent *entorno.Entorno) string {
 
 				if !ent.ExisteFuncion(func_.Identificador) {
 					ent.AgregarFuncion(func_.Identificador, func_)
-
-					if func_.Identificador != "main" {
-						codigo += func_.Get3D(ent)
-					}
-
 				} else {
 					//ERROR
 				}
+
 			} else {
 				codigo += r.(interfaces.Instruccion).Get3D(ent)
 			}
@@ -232,6 +230,7 @@ func CREAR_MAIN(MAIN entorno.Clase, ent *entorno.Entorno) string {
 		}
 
 	}
+
 
 	return codigo
 

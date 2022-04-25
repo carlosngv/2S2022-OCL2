@@ -2,6 +2,7 @@ package asignacion
 
 import (
 	"p1/packages/Analizador/ast/interfaces"
+	"p1/packages/Analizador/entorno"
 )
 
 type Asignacion struct {
@@ -13,7 +14,7 @@ type Asignacion struct {
 
 }
 
-func NuevaAsignacion(id string, nuevoValor interfaces.Expresion, linea int, columna int ) Asignacion{
+func NewAsignacion(id string, nuevoValor interfaces.Expresion, linea int, columna int ) Asignacion{
 	return Asignacion{
 		ID:				id,
 		NuevoValor:		nuevoValor,
@@ -23,7 +24,7 @@ func NuevaAsignacion(id string, nuevoValor interfaces.Expresion, linea int, colu
 	}
 }
 
-func NuevaAsignacionValor(id string, valor interface{} ) Asignacion{
+func NewAsignacionValor(id string, valor interface{} ) Asignacion{
 	return Asignacion{
 		ID:				id,
 		NuevoValor:		nil,
@@ -31,4 +32,9 @@ func NuevaAsignacionValor(id string, valor interface{} ) Asignacion{
 		Linea:			0,
 		Columna:		0,
 	}
+}
+
+
+func (asignacion Asignacion) Get3D(ent *entorno.Entorno) string {
+	return ""
 }

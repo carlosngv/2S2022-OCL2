@@ -27,11 +27,35 @@ func (s *BaseParserListener) EnterStart(ctx *StartContext) {}
 // ExitStart is called when production start is exited.
 func (s *BaseParserListener) ExitStart(ctx *StartContext) {}
 
-// EnterListaFunciones is called when production listaFunciones is entered.
-func (s *BaseParserListener) EnterListaFunciones(ctx *ListaFuncionesContext) {}
+// EnterListaClases is called when production listaClases is entered.
+func (s *BaseParserListener) EnterListaClases(ctx *ListaClasesContext) {}
 
-// ExitListaFunciones is called when production listaFunciones is exited.
-func (s *BaseParserListener) ExitListaFunciones(ctx *ListaFuncionesContext) {}
+// ExitListaClases is called when production listaClases is exited.
+func (s *BaseParserListener) ExitListaClases(ctx *ListaClasesContext) {}
+
+// EnterClases is called when production clases is entered.
+func (s *BaseParserListener) EnterClases(ctx *ClasesContext) {}
+
+// ExitClases is called when production clases is exited.
+func (s *BaseParserListener) ExitClases(ctx *ClasesContext) {}
+
+// EnterCuerpoClase is called when production cuerpoClase is entered.
+func (s *BaseParserListener) EnterCuerpoClase(ctx *CuerpoClaseContext) {}
+
+// ExitCuerpoClase is called when production cuerpoClase is exited.
+func (s *BaseParserListener) ExitCuerpoClase(ctx *CuerpoClaseContext) {}
+
+// EnterContenidoClase is called when production contenidoClase is entered.
+func (s *BaseParserListener) EnterContenidoClase(ctx *ContenidoClaseContext) {}
+
+// ExitContenidoClase is called when production contenidoClase is exited.
+func (s *BaseParserListener) ExitContenidoClase(ctx *ContenidoClaseContext) {}
+
+// EnterItemClase is called when production itemClase is entered.
+func (s *BaseParserListener) EnterItemClase(ctx *ItemClaseContext) {}
+
+// ExitItemClase is called when production itemClase is exited.
+func (s *BaseParserListener) ExitItemClase(ctx *ItemClaseContext) {}
 
 // EnterFuncionItem is called when production funcionItem is entered.
 func (s *BaseParserListener) EnterFuncionItem(ctx *FuncionItemContext) {}
@@ -50,6 +74,12 @@ func (s *BaseParserListener) EnterParametros(ctx *ParametrosContext) {}
 
 // ExitParametros is called when production parametros is exited.
 func (s *BaseParserListener) ExitParametros(ctx *ParametrosContext) {}
+
+// EnterParametro is called when production parametro is entered.
+func (s *BaseParserListener) EnterParametro(ctx *ParametroContext) {}
+
+// ExitParametro is called when production parametro is exited.
+func (s *BaseParserListener) ExitParametro(ctx *ParametroContext) {}
 
 // EnterFuncmain is called when production funcmain is entered.
 func (s *BaseParserListener) EnterFuncmain(ctx *FuncmainContext) {}
@@ -279,11 +309,11 @@ func (s *BaseParserListener) EnterAcceso(ctx *AccesoContext) {}
 // ExitAcceso is called when production acceso is exited.
 func (s *BaseParserListener) ExitAcceso(ctx *AccesoContext) {}
 
-// EnterExpression is called when production expression is entered.
-func (s *BaseParserListener) EnterExpression(ctx *ExpressionContext) {}
+// EnterExpresion is called when production expresion is entered.
+func (s *BaseParserListener) EnterExpresion(ctx *ExpresionContext) {}
 
-// ExitExpression is called when production expression is exited.
-func (s *BaseParserListener) ExitExpression(ctx *ExpressionContext) {}
+// ExitExpresion is called when production expresion is exited.
+func (s *BaseParserListener) ExitExpresion(ctx *ExpresionContext) {}
 
 // EnterExpr_rel is called when production expr_rel is entered.
 func (s *BaseParserListener) EnterExpr_rel(ctx *Expr_relContext) {}

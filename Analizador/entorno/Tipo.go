@@ -35,4 +35,6 @@ type Result3D struct {
 	Temporal 	string
 	EtiquetaV	string
 	EtiquetaF	string
+	Valor     interface{}
+	ValorEnHeap bool
 }

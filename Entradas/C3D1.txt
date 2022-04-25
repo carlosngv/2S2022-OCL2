@@ -1,0 +1,26 @@
+
+mod a {
+	fn main() {
+		let var1: String = "hola mundo";
+		let a: i64 = 1;
+		let b: i64 = 32;
+		let c: i64 = 100;
+		let ch: char = 's';
+
+
+		llamada(b, c);
+	}
+
+	fn llamada(*i64 a, *i64 b) {
+
+		if(a>b) {
+			println!("La suma es: " + (a+b));
+		} else {
+			println!("No aplica");
+
+		}
+
+
+
+	}
+}

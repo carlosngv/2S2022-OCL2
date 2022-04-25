@@ -46,45 +46,52 @@ type Operacion struct {
 	Op2      interfaces.Expresion
 	Unario   bool
 	TipoPow  entorno.TipoDato
-	EtiquetaF     string
-	EtiquetaV string
+	EtiquetaFalsa     string
+	EtiquetaVerdadera string
 }
 
-func NuevaOperacion(Op1 interfaces.Expresion, Operador string, Op2 interfaces.Expresion, unario bool, tipoPow entorno.TipoDato) Operacion {
+func NewOperacion(Op1 interfaces.Expresion, Operador string, Op2 interfaces.Expresion, unario bool, tipoPow entorno.TipoDato) Operacion {
 
 	e := Operacion{Op1, Operador, Op2, unario, tipoPow, "", ""}
 
 	return e
 }
 
-func (op Operacion) Obtener3D(ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) Obtener3D(ent *entorno.Entorno) entorno.Result3D {
 
-	switch op.Operador {
+	switch this.Operador {
 
 	case "+":
-		return op.SUMA(op.Op1, op.Op2, ent)
+		return this.SUMA(this.Op1, this.Op2, ent)
 	case "-":
 
-		if op.Unario {
-			return op.RESTA_UNARIA(op.Op1, ent)
+		if this.Unario {
+			return this.RESTA_UNARIA(this.Op1, ent)
 		}
 
-		return op.RESTA(op.Op1, op.Op2, ent)
-
-	case "!=":
-	case ">=":
-	case "<=":
-	case "==":
+		return this.RESTA(this.Op1, this.Op2, ent)
+	case "*":
+		return this.MULTIPLICACION(this.Op1, this.Op2, ent)
+	case "/":
+		return this.DIVISION(this.Op1, this.Op2, ent)
 	case ">":
-		return op.RELACIONAL(op.Op1, op.Op2, ent, op.Operador)
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
 	case "<":
-		return op.RELACIONAL(op.Op1, op.Op2, ent, op.Operador)
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
+	case "!=":
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
+	case ">=":
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
+	case "<=":
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
+	case "==":
+		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
 	}
 
 	return entorno.Result3D{}
 }
 
-func (op Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
 	/*
 	 * if ( x < 100 || x > 200 && x != y ) x = 0;
 	 *
@@ -101,16 +108,16 @@ func (op Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresio
 
 	if reflect.TypeOf(Izq) == reflect.TypeOf(Operacion{}) {
 		opIzq := Izq.(Operacion)
-		opIzq.EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
-		opIzq.EtiquetaF = op.EtiquetaF
+		opIzq.EtiquetaVerdadera = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		opIzq.EtiquetaFalsa = this.EtiquetaFalsa
 	}
 
 	resultadoIzq := Izq.Obtener3D(ent)
 
 	if reflect.TypeOf(Der) == reflect.TypeOf(Operacion{}) {
 		opDer := Der.(Operacion)
-		opDer.EtiquetaV = op.EtiquetaV
-		opDer.EtiquetaF = op.EtiquetaF
+		opDer.EtiquetaVerdadera = this.EtiquetaVerdadera
+		opDer.EtiquetaFalsa = this.EtiquetaFalsa
 	}
 
 	resultadoDer := Der.Obtener3D(ent)
@@ -123,19 +130,19 @@ func (op Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresio
 
 	if resultadoIzq.Temporal == "0" || resultadoIzq.Temporal == "1" {
 
-		EtiquetaV := Analizador.GeneradorGlobal.ObtenerEtiqueta()
-		etiquetaF := op.EtiquetaF
+		etiquetaVerdadera := Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaFalsa := this.EtiquetaFalsa
 
-		if op.EtiquetaF == "" {
-			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		if this.EtiquetaFalsa == "" {
+			etiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		}
 
 		RESULTADO_FINAL.Codigo += resultadoIzq.Codigo
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoIzq.Temporal, EtiquetaV)
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaF)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoIzq.Temporal, etiquetaVerdadera)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaFalsa)
 
-		RESULTADO_FINAL.EtiquetaF = etiquetaF
-		RESULTADO_FINAL.EtiquetaV = EtiquetaV
+		RESULTADO_FINAL.EtiquetaF = etiquetaFalsa
+		RESULTADO_FINAL.EtiquetaV = etiquetaVerdadera
 
 	} else {
 		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo
@@ -145,19 +152,19 @@ func (op Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresio
 
 	if resultadoDer.Temporal == "0" || resultadoDer.Temporal == "1" {
 
-		EtiquetaV := Analizador.GeneradorGlobal.ObtenerEtiqueta()
-		etiquetaF := op.EtiquetaF
+		etiquetaVerdadera := Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaFalsa := this.EtiquetaFalsa
 
-		if op.EtiquetaF == "" {
-			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		if this.EtiquetaFalsa == "" {
+			etiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		}
 
 		RESULTADO_FINAL.Codigo += resultadoDer.Codigo
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoDer.Temporal, EtiquetaV)
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaF)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoDer.Temporal, etiquetaVerdadera)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaFalsa)
 
 		RESULTADO_FINAL.EtiquetaF = resultadoIzq.EtiquetaF
-		RESULTADO_FINAL.EtiquetaV = EtiquetaV
+		RESULTADO_FINAL.EtiquetaV = etiquetaVerdadera
 
 	} else {
 		RESULTADO_FINAL.Codigo = resultadoDer.Codigo
@@ -171,7 +178,7 @@ func (op Operacion) LOGICA_AND(Izq interfaces.Expresion, Der interfaces.Expresio
 
 }
 
-func (op Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
 	/*
 	 * if ( x < 100 || x > 200 && x != y ) x = 0;
 	 *
@@ -188,16 +195,16 @@ func (op Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion
 
 	if reflect.TypeOf(Izq) == reflect.TypeOf(Operacion{}) {
 		opIzq := Izq.(Operacion)
-		opIzq.EtiquetaV = op.EtiquetaV
-		opIzq.EtiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		opIzq.EtiquetaVerdadera = this.EtiquetaVerdadera
+		opIzq.EtiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 	}
 
 	resultadoIzq := Izq.Obtener3D(ent)
 
 	if reflect.TypeOf(Der) == reflect.TypeOf(Operacion{}) {
 		opDer := Der.(Operacion)
-		opDer.EtiquetaV = op.EtiquetaV
-		opDer.EtiquetaF = op.EtiquetaF
+		opDer.EtiquetaVerdadera = this.EtiquetaVerdadera
+		opDer.EtiquetaFalsa = this.EtiquetaFalsa
 	}
 
 	resultadoDer := Der.Obtener3D(ent)
@@ -210,19 +217,19 @@ func (op Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion
 
 	if resultadoIzq.Temporal == "0" || resultadoIzq.Temporal == "1" {
 
-		EtiquetaV := op.EtiquetaV
-		etiquetaF := Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		etiquetaVerdadera := this.EtiquetaVerdadera
+		etiquetaFalsa := Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
-		if op.EtiquetaF == "" {
-			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		if this.EtiquetaFalsa == "" {
+			etiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		}
 
 		RESULTADO_FINAL.Codigo += resultadoIzq.Codigo
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoIzq.Temporal, EtiquetaV)
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaF)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoIzq.Temporal, etiquetaVerdadera)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaFalsa)
 
-		RESULTADO_FINAL.EtiquetaF = etiquetaF
-		RESULTADO_FINAL.EtiquetaV = EtiquetaV
+		RESULTADO_FINAL.EtiquetaF = etiquetaFalsa
+		RESULTADO_FINAL.EtiquetaV = etiquetaVerdadera
 
 	} else {
 		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo
@@ -232,19 +239,19 @@ func (op Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion
 
 	if resultadoDer.Temporal == "0" || resultadoDer.Temporal == "1" {
 
-		EtiquetaV := op.EtiquetaV
-		etiquetaF := op.EtiquetaF
+		etiquetaVerdadera := this.EtiquetaVerdadera
+		etiquetaFalsa := this.EtiquetaFalsa
 
-		if op.EtiquetaF == "" {
-			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		if this.EtiquetaFalsa == "" {
+			etiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		}
 
 		RESULTADO_FINAL.Codigo += resultadoDer.Codigo
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoDer.Temporal, EtiquetaV)
-		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaF)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("if (%s == 1 ) goto %s;\n", resultadoDer.Temporal, etiquetaVerdadera)
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaFalsa)
 
-		RESULTADO_FINAL.EtiquetaF = etiquetaF
-		RESULTADO_FINAL.EtiquetaV = EtiquetaV
+		RESULTADO_FINAL.EtiquetaF = etiquetaFalsa
+		RESULTADO_FINAL.EtiquetaV = etiquetaVerdadera
 
 	} else {
 		RESULTADO_FINAL.Codigo = resultadoDer.Codigo
@@ -258,7 +265,7 @@ func (op Operacion) LOGICA_OR(Izq interfaces.Expresion, Der interfaces.Expresion
 
 }
 
-func (op Operacion) RESTA_UNARIA(operando interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) RESTA_UNARIA(operando interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
 
 	resultadoOperando := operando.Obtener3D(ent)
 
@@ -277,7 +284,7 @@ func (op Operacion) RESTA_UNARIA(operando interfaces.Expresion, ent *entorno.Ent
 
 }
 
-func (op Operacion) RESTA(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) RESTA(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
 
 	resultadoIzq := Izq.Obtener3D(ent)
 
@@ -293,13 +300,15 @@ func (op Operacion) RESTA(Izq interfaces.Expresion, Der interfaces.Expresion, en
 	RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
 	RESULTADO_FINAL.Tipo = tipoDominante
 
+	RESULTADO_FINAL.Codigo += resultadoIzq.Codigo + "\n"
+	RESULTADO_FINAL.Codigo += resultadoDer.Codigo + "\n"
 	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s - %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
 
 	return RESULTADO_FINAL
 
 }
 
-func (op Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+func (this Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
 
 	resultadoIzq := Izq.Obtener3D(ent)
 
@@ -307,23 +316,23 @@ func (op Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent
 
 	RESULTADO_FINAL := entorno.Result3D{}
 
-	tipoDiminante := suma_dominante[resultadoIzq.Tipo][resultadoDer.Tipo]
+	tipoDominante := suma_dominante[resultadoIzq.Tipo][resultadoDer.Tipo]
 
-	if tipoDiminante == entorno.INTEGER {
+	if tipoDominante == entorno.INTEGER {
 		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
 		RESULTADO_FINAL.Tipo = entorno.INTEGER
 
 		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
 		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s + %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
 
-	} else if tipoDiminante == entorno.FLOAT {
+	} else if tipoDominante == entorno.FLOAT {
 		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
 		RESULTADO_FINAL.Tipo = entorno.INTEGER
 
 		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
 		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s + %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
 
-	} else if tipoDiminante == entorno.STRING {
+	} else if tipoDominante == entorno.STRING {
 
 		RESULTADO_FINAL.Codigo += resultadoIzq.Codigo
 		RESULTADO_FINAL.Codigo += resultadoDer.Codigo + "\n"
@@ -341,7 +350,7 @@ func (op Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent
 			codigo1 += fmt.Sprintf("HP = HP + 1;\n")
 		} else {
 
-			codigo1 = op.SumarCadena(resultadoIzq)
+			codigo1 = this.SumarCadena(resultadoIzq)
 		}
 
 		codigo2 := ""
@@ -352,7 +361,7 @@ func (op Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent
 			codigo2 += fmt.Sprintf("HP = HP + 1;\n")
 		} else {
 
-			codigo2 = op.SumarCadena(resultadoDer)
+			codigo2 = this.SumarCadena(resultadoDer)
 		}
 
 		RESULTADO_FINAL.Codigo += codigo1
@@ -366,7 +375,140 @@ func (op Operacion) SUMA(Izq interfaces.Expresion, Der interfaces.Expresion, ent
 	return RESULTADO_FINAL
 }
 
-func (op Operacion) RELACIONAL(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno, relacion string) entorno.Result3D {
+func (this Operacion) MULTIPLICACION(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+
+	resultadoIzq := Izq.Obtener3D(ent)
+
+	resultadoDer := Der.Obtener3D(ent)
+
+	RESULTADO_FINAL := entorno.Result3D{}
+
+	tipoDominante := multi_division_dominante[resultadoIzq.Tipo][resultadoDer.Tipo]
+
+	if tipoDominante == entorno.INTEGER {
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.INTEGER
+
+		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s * %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
+
+	} else if tipoDominante == entorno.FLOAT {
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.INTEGER
+
+		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s * %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
+
+	} else if tipoDominante == entorno.STRING {
+
+		RESULTADO_FINAL.Codigo += resultadoIzq.Codigo
+		RESULTADO_FINAL.Codigo += resultadoDer.Codigo + "\n"
+
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.STRING
+
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s = HP; /* nueva posicion de string */ \n", RESULTADO_FINAL.Temporal)
+
+		codigo1 := ""
+		if resultadoIzq.Tipo != entorno.STRING {
+			codigo1 += fmt.Sprintf("Heap[HP] = -1; \n")
+			codigo1 += fmt.Sprintf("HP = HP + 1;\n")
+			codigo1 += fmt.Sprintf("Heap[HP] = %s; \n", resultadoIzq.Temporal)
+			codigo1 += fmt.Sprintf("HP = HP + 1;\n")
+		} else {
+
+			//codigo1 = this.SumarCadena(resultadoIzq)
+		}
+
+		codigo2 := ""
+		if resultadoDer.Tipo != entorno.STRING {
+			codigo2 += fmt.Sprintf("Heap[HP] = -1; \n")
+			codigo2 += fmt.Sprintf("HP = HP + 1;\n")
+			codigo2 += fmt.Sprintf("Heap[HP] = %s; \n", resultadoDer.Temporal)
+			codigo2 += fmt.Sprintf("HP = HP + 1;\n")
+		} else {
+
+			//codigo2 = this.SumarCadena(resultadoDer)
+		}
+
+		RESULTADO_FINAL.Codigo += codigo1
+		RESULTADO_FINAL.Codigo += codigo2
+
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("Heap[HP] = 0; /* caracter de escape */ \n")
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("HP = HP + 1; ")
+
+	}
+
+	return RESULTADO_FINAL
+}
+func (this Operacion) DIVISION(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno) entorno.Result3D {
+
+	resultadoIzq := Izq.Obtener3D(ent)
+
+	resultadoDer := Der.Obtener3D(ent)
+
+	RESULTADO_FINAL := entorno.Result3D{}
+
+	tipoDominante := multi_division_dominante[resultadoIzq.Tipo][resultadoDer.Tipo]
+
+	if tipoDominante == entorno.INTEGER {
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.INTEGER
+
+		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s / %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
+
+	} else if tipoDominante == entorno.FLOAT {
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.INTEGER
+
+		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s= %s / %s; \n", RESULTADO_FINAL.Temporal, resultadoIzq.Temporal, resultadoDer.Temporal)
+
+	} else if tipoDominante == entorno.STRING {
+
+		RESULTADO_FINAL.Codigo += resultadoIzq.Codigo
+		RESULTADO_FINAL.Codigo += resultadoDer.Codigo + "\n"
+
+		RESULTADO_FINAL.Temporal = Analizador.GeneradorGlobal.ObtenerTemporal()
+		RESULTADO_FINAL.Tipo = entorno.STRING
+
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("%s = HP; /* nueva posicion de string */ \n", RESULTADO_FINAL.Temporal)
+
+		codigo1 := ""
+		if resultadoIzq.Tipo != entorno.STRING {
+			codigo1 += fmt.Sprintf("Heap[HP] = -1; \n")
+			codigo1 += fmt.Sprintf("HP = HP + 1;\n")
+			codigo1 += fmt.Sprintf("Heap[HP] = %s; \n", resultadoIzq.Temporal)
+			codigo1 += fmt.Sprintf("HP = HP + 1;\n")
+		} else {
+
+			//codigo1 = this.SumarCadena(resultadoIzq)
+		}
+
+		codigo2 := ""
+		if resultadoDer.Tipo != entorno.STRING {
+			codigo2 += fmt.Sprintf("Heap[HP] = -1; \n")
+			codigo2 += fmt.Sprintf("HP = HP + 1;\n")
+			codigo2 += fmt.Sprintf("Heap[HP] = %s; \n", resultadoDer.Temporal)
+			codigo2 += fmt.Sprintf("HP = HP + 1;\n")
+		} else {
+
+			//codigo2 = this.SumarCadena(resultadoDer)
+		}
+
+		RESULTADO_FINAL.Codigo += codigo1
+		RESULTADO_FINAL.Codigo += codigo2
+
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("Heap[HP] = 0; /* caracter de escape */ \n")
+		RESULTADO_FINAL.Codigo += fmt.Sprintf("HP = HP + 1; ")
+
+	}
+
+	return RESULTADO_FINAL
+}
+
+func (this Operacion) RELACIONAL(Izq interfaces.Expresion, Der interfaces.Expresion, ent *entorno.Entorno, relacion string) entorno.Result3D {
 
 	/*
 	 * if a < b goto B.true
@@ -378,43 +520,90 @@ func (op Operacion) RELACIONAL(Izq interfaces.Expresion, Der interfaces.Expresio
 	resultadoIzq := Izq.Obtener3D(ent)
 	resultadoDer := Der.Obtener3D(ent)
 
+
 	/* Prueba para ver si los datos son numeros, no se suman, solo es prueba*/
 
 	dominante := suma_dominante[resultadoIzq.Tipo][resultadoDer.Tipo]
 
 	// RELACIONAL ENTRE NUMEROS
 	if dominante != entorno.NULL {
+		etiquetaV := ""
+		fmt.Println(etiquetaV)
+		if this.EtiquetaVerdadera == "" {
+			etiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		} else {
+			etiquetaV = this.EtiquetaVerdadera
+		}
+		etiquetaF := ""
+		fmt.Println(etiquetaF)
+		if this.EtiquetaFalsa == "" {
+			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+		} else {
+			etiquetaF = this.EtiquetaVerdadera
+		}
 
+		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+		RESULTADO_FINAL.Codigo += "if (" + resultadoIzq.Temporal +" "+ relacion + " " +  resultadoDer.Temporal + ") goto "+ etiquetaV + "; \n";
+		RESULTADO_FINAL.Codigo += Analizador.GeneradorGlobal.TabularLinea("goto " + etiquetaF + ";\n",2);
+
+		RESULTADO_FINAL.EtiquetaV = etiquetaV
+		RESULTADO_FINAL.EtiquetaF = etiquetaF
+		RESULTADO_FINAL.Tipo = entorno.BOOLEAN
+		return RESULTADO_FINAL
 	} else if resultadoIzq.Tipo == entorno.BOOLEAN && resultadoDer.Tipo == entorno.BOOLEAN &&
 		(relacion == "!=" || relacion == "==") {
+			etiquetaV := ""
+			fmt.Println(etiquetaV)
+			if this.EtiquetaVerdadera == "" {
+				etiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+			} else {
+				etiquetaV = this.EtiquetaVerdadera
+			}
+			etiquetaF := ""
+			fmt.Println(etiquetaF)
+			if this.EtiquetaFalsa == "" {
+				etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+			} else {
+				etiquetaF = this.EtiquetaVerdadera
+			}
 
+			RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
+			RESULTADO_FINAL.Codigo += "if (" + resultadoIzq.Temporal +" "+ relacion + " " +  resultadoDer.Temporal + ") goto "+ etiquetaV + "; \n";
+			RESULTADO_FINAL.Codigo += Analizador.GeneradorGlobal.TabularLinea("goto " + etiquetaF + ";\n",2);
+
+			RESULTADO_FINAL.EtiquetaV = etiquetaV
+			RESULTADO_FINAL.EtiquetaF = etiquetaF
+			RESULTADO_FINAL.Tipo = entorno.BOOLEAN
+			return RESULTADO_FINAL
 	} else {
 		return entorno.Result3D{}
 	}
 
-	EtiquetaV := op.EtiquetaV
-	etiquetaF := op.EtiquetaV
+	// ! A PARTIR DE ACA, EL CODIGO NO APLICA
 
-	if op.EtiquetaV == "" {
-		EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
-	}
+	// etiquetaVerdadera := this.EtiquetaVerdadera
+	// etiquetaFalsa := this.EtiquetaVerdadera
 
-	if op.EtiquetaF == "" {
-		etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
-	}
+	// if this.EtiquetaVerdadera == "" {
+	// 	etiquetaVerdadera = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+	// }
 
-	RESULTADO_FINAL.Codigo += fmt.Sprintf("if ( %s %s %s ) goto %s; \n", resultadoIzq.Temporal, relacion, resultadoDer.Temporal, EtiquetaV)
-	RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaF)
+	// if this.EtiquetaFalsa == "" {
+	// 	etiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+	// }
 
-	RESULTADO_FINAL.EtiquetaV = EtiquetaV
-	RESULTADO_FINAL.EtiquetaF = etiquetaF
-	RESULTADO_FINAL.Tipo = entorno.BOOLEAN
+	// RESULTADO_FINAL.Codigo += fmt.Sprintf("if ( %s %s %s ) goto %s; \n", resultadoIzq.Temporal, relacion, resultadoDer.Temporal, etiquetaVerdadera)
+	// RESULTADO_FINAL.Codigo += fmt.Sprintf("goto %s;", etiquetaFalsa)
 
-	return RESULTADO_FINAL
+	// RESULTADO_FINAL.EtiquetaV = etiquetaVerdadera
+	// RESULTADO_FINAL.EtiquetaF = etiquetaFalsa
+	// RESULTADO_FINAL.Tipo = entorno.BOOLEAN
+
+	// return RESULTADO_FINAL
 
 }
 
-func (op Operacion) SumarCadena(exprResultado entorno.Result3D) string {
+func (this Operacion) SumarCadena(exprResultado entorno.Result3D) string {
 
 	CODIGO_SALIDA := ""
 
@@ -435,4 +624,8 @@ func (op Operacion) SumarCadena(exprResultado entorno.Result3D) string {
 
 	return CODIGO_SALIDA
 
+}
+
+func (this Operacion) Obtener3DRef(ent *entorno.Entorno) entorno.Result3D {
+	return entorno.Result3D{}
 }

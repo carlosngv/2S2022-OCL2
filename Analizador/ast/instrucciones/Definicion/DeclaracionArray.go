@@ -23,6 +23,10 @@ func NewDeclaracionArray(tamano int, identificador string, inicializar interface
 	}
 }
 
+func (dec DeclaracionArray) Get3D(ent *entorno.Entorno) string {
+	return ""
+}
+
 /*
 	La declaración se enfoca en el lado izquierdo al definir una arreglo.
 	Ejemplo

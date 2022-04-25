@@ -29,3 +29,7 @@ func NewVector(id string, tipo entorno.TipoDato, esMutable bool) InstanciaVector
 	}
 	return exp
 }
+
+func (vec InstanciaVector) Get3D(ent *entorno.Entorno) string {
+	return ""
+}

@@ -11,8 +11,20 @@ type ParserListener interface {
 	// EnterStart is called when entering the start production.
 	EnterStart(c *StartContext)
 
-	// EnterListaFunciones is called when entering the listaFunciones production.
-	EnterListaFunciones(c *ListaFuncionesContext)
+	// EnterListaClases is called when entering the listaClases production.
+	EnterListaClases(c *ListaClasesContext)
+
+	// EnterClases is called when entering the clases production.
+	EnterClases(c *ClasesContext)
+
+	// EnterCuerpoClase is called when entering the cuerpoClase production.
+	EnterCuerpoClase(c *CuerpoClaseContext)
+
+	// EnterContenidoClase is called when entering the contenidoClase production.
+	EnterContenidoClase(c *ContenidoClaseContext)
+
+	// EnterItemClase is called when entering the itemClase production.
+	EnterItemClase(c *ItemClaseContext)
 
 	// EnterFuncionItem is called when entering the funcionItem production.
 	EnterFuncionItem(c *FuncionItemContext)
@@ -22,6 +34,9 @@ type ParserListener interface {
 
 	// EnterParametros is called when entering the parametros production.
 	EnterParametros(c *ParametrosContext)
+
+	// EnterParametro is called when entering the parametro production.
+	EnterParametro(c *ParametroContext)
 
 	// EnterFuncmain is called when entering the funcmain production.
 	EnterFuncmain(c *FuncmainContext)
@@ -137,8 +152,8 @@ type ParserListener interface {
 	// EnterAcceso is called when entering the acceso production.
 	EnterAcceso(c *AccesoContext)
 
-	// EnterExpression is called when entering the expression production.
-	EnterExpression(c *ExpressionContext)
+	// EnterExpresion is called when entering the expresion production.
+	EnterExpresion(c *ExpresionContext)
 
 	// EnterExpr_rel is called when entering the expr_rel production.
 	EnterExpr_rel(c *Expr_relContext)
@@ -158,8 +173,20 @@ type ParserListener interface {
 	// ExitStart is called when exiting the start production.
 	ExitStart(c *StartContext)
 
-	// ExitListaFunciones is called when exiting the listaFunciones production.
-	ExitListaFunciones(c *ListaFuncionesContext)
+	// ExitListaClases is called when exiting the listaClases production.
+	ExitListaClases(c *ListaClasesContext)
+
+	// ExitClases is called when exiting the clases production.
+	ExitClases(c *ClasesContext)
+
+	// ExitCuerpoClase is called when exiting the cuerpoClase production.
+	ExitCuerpoClase(c *CuerpoClaseContext)
+
+	// ExitContenidoClase is called when exiting the contenidoClase production.
+	ExitContenidoClase(c *ContenidoClaseContext)
+
+	// ExitItemClase is called when exiting the itemClase production.
+	ExitItemClase(c *ItemClaseContext)
 
 	// ExitFuncionItem is called when exiting the funcionItem production.
 	ExitFuncionItem(c *FuncionItemContext)
@@ -169,6 +196,9 @@ type ParserListener interface {
 
 	// ExitParametros is called when exiting the parametros production.
 	ExitParametros(c *ParametrosContext)
+
+	// ExitParametro is called when exiting the parametro production.
+	ExitParametro(c *ParametroContext)
 
 	// ExitFuncmain is called when exiting the funcmain production.
 	ExitFuncmain(c *FuncmainContext)
@@ -284,8 +314,8 @@ type ParserListener interface {
 	// ExitAcceso is called when exiting the acceso production.
 	ExitAcceso(c *AccesoContext)
 
-	// ExitExpression is called when exiting the expression production.
-	ExitExpression(c *ExpressionContext)
+	// ExitExpresion is called when exiting the expresion production.
+	ExitExpresion(c *ExpresionContext)
 
 	// ExitExpr_rel is called when exiting the expr_rel production.
 	ExitExpr_rel(c *Expr_relContext)

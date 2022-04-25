@@ -1,6 +1,8 @@
 package SentenciasCiclicas
 
 import (
+	"p1/packages/Analizador/entorno"
+
 	arrayList "github.com/colegno/arraylist"
 )
 
@@ -20,4 +22,9 @@ func NewLoopInstruccion(listaInstrucciones *arrayList.List) LoopInstruccion {
 	return LoopInstruccion{
 		ListaInstrucciones: listaInstrucciones,
 	}
+}
+
+
+func (lp LoopInstruccion) Get3D(ent *entorno.Entorno) string {
+	return ""
 }

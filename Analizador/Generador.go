@@ -8,11 +8,24 @@ import (
 type Generador struct {
 	temporales int
 	etiquetas  int
+	Bloquear   bool
+	Funciones  string
 }
 
-var GeneradorGlobal Generador = Generador{0, 0}
+var GeneradorGlobal Generador = Generador{0, 0, false, ""}
 
 func (g *Generador) ObtenerTemporal() string {
+
+	if g.Bloquear {
+		return " "
+	}
+
+	temporaln := "t" + fmt.Sprint(g.temporales)
+	g.temporales = g.temporales + 1
+	return temporaln
+}
+
+func (g *Generador) ObtenerTemporalForzado() string {
 
 	temporaln := "t" + fmt.Sprint(g.temporales)
 	g.temporales = g.temporales + 1
@@ -20,6 +33,10 @@ func (g *Generador) ObtenerTemporal() string {
 }
 
 func (g *Generador) ObtenerEtiqueta() string {
+
+	if g.Bloquear {
+		return " "
+	}
 
 	temporalEtiqueta := "L" + fmt.Sprint(g.etiquetas)
 	g.etiquetas = g.etiquetas + 1
@@ -35,8 +52,6 @@ func (g *Generador) Encabezado() string {
 		int HP=0; //Puntero al heap`
 
 	if g.temporales > 0 {
-
-		fmt.Println("Se declaran las variables temporales en el encabezado.")
 
 		encabezado += "\nfloat "
 		for i := 0; i < g.temporales; i++ {
@@ -58,6 +73,7 @@ func (g *Generador) Encabezado() string {
 func (g *Generador) Reiniciar() {
 	g.temporales = 0
 	g.etiquetas = 0
+	g.Funciones = ""
 }
 
 func (g *Generador) Tabular(cadena string) string {
@@ -70,10 +86,15 @@ func (g *Generador) Tabular(cadena string) string {
 }
 
 func (g *Generador) TabularLinea(cadena string, tabs int) string {
-	stringNuevo := ""
+	salida := ""
 
 	for i := 0; i < tabs; i++ {
-		stringNuevo = "\t" + stringNuevo
+		salida = "\t" + salida
 	}
-	return stringNuevo
+	salida += cadena
+	return salida
+}
+
+func (this *Generador) GenerarFuncion(codFuncion string) {
+	this.Funciones += codFuncion
 }

@@ -5,9 +5,9 @@ import (
 )
 
 type Entorno struct {
-	Nombre      string
-	EntAnterior *Entorno
-	Tabla       map[string]interface{}
+	Nombre         string
+	EntAnterior    *Entorno
+	Tabla          map[string]interface{}
 	TablaFunciones map[string]interface{}
 	TablaClases    map[string]interface{}
 	Tamanio        int
@@ -19,21 +19,19 @@ func NewEntorno(nombre string, entAnterior *Entorno) Entorno {
 	TablaFunciones := make(map[string]interface{})
 	TablaClases := make(map[string]interface{})
 
-
-	en := Entorno{Nombre: nombre, EntAnterior: entAnterior, Tabla: Tabla, TablaFunciones: TablaFunciones,  TablaClases: TablaClases}
+	en := Entorno{Nombre: nombre, EntAnterior: entAnterior, Tabla: Tabla, TablaFunciones: TablaFunciones, TablaClases: TablaClases}
 	en.Tamanio = 0
 	return en
-
 }
 
 func (ent *Entorno) ExisteSimbolo(identificador string) bool {
 
-	ident := strings.ToLower(identificador)
+	ideFinal := strings.ToLower(identificador)
 
 	for entActual := ent; entActual != nil; entActual = entActual.EntAnterior {
 
 		for key, _ := range entActual.Tabla {
-			if key == ident {
+			if key == ideFinal {
 				return true
 			}
 		}
@@ -43,19 +41,19 @@ func (ent *Entorno) ExisteSimbolo(identificador string) bool {
 }
 
 func (ent *Entorno) AgregarSimbolo(identificador string, simbolo interface{}) {
-	ident := strings.ToLower(identificador)
+	ideFinal := strings.ToLower(identificador)
 
-	ent.Tabla[ident] = simbolo
+	ent.Tabla[ideFinal] = simbolo
 }
 
 func (ent *Entorno) ObtenerSimbolo(identificador string) interface{} {
 
-	ident := strings.ToLower(identificador)
+	ideFinal := strings.ToLower(identificador)
 
 	for entActual := ent; entActual != nil; entActual = entActual.EntAnterior {
 
 		for key, simboloElement := range entActual.Tabla {
-			if key == ident {
+			if key == ideFinal {
 				return simboloElement
 			}
 		}
@@ -85,13 +83,13 @@ func (ent *Entorno) ObtenerSimboloRef(identificador string) *interface{} {
 
 func (ent *Entorno) CambiarValor(identificador string, simboloNuevo interface{}) {
 
-	idFinal := strings.ToLower(identificador)
+	ideFinal := strings.ToLower(identificador)
 
 	for entActual := ent; entActual != nil; entActual = entActual.EntAnterior {
 
 		for key, _ := range entActual.Tabla {
-			if key == idFinal {
-				ent.Tabla[idFinal] = simboloNuevo
+			if key == ideFinal {
+				ent.Tabla[ideFinal] = simboloNuevo
 				return
 			}
 		}
@@ -100,7 +98,6 @@ func (ent *Entorno) CambiarValor(identificador string, simboloNuevo interface{})
 
 func (ent *Entorno) AgregarFuncion(identificador string, simbolo interface{}) {
 	ideFinal := strings.ToLower(identificador)
-
 	ent.TablaFunciones[ideFinal] = simbolo
 }
 
@@ -171,4 +168,20 @@ func (ent *Entorno) ObtenerClase(identificador string) interface{} {
 	}
 
 	return nil
+}
+
+func (ent *Entorno) CambiarFuncionGenerada(identificador string, funcionGenerada interface{}) {
+
+	ideFinal := strings.ToLower(identificador)
+
+	for entActual := ent; entActual != nil; entActual = entActual.EntAnterior {
+
+		for key, _ := range entActual.TablaFunciones {
+			if key == ideFinal {
+				entActual.TablaFunciones[key] = funcionGenerada
+				return
+			}
+		}
+	}
+	return
 }

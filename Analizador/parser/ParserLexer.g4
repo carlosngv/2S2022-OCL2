@@ -28,6 +28,8 @@ LOOP:       'loop';
 FOR:        'for';
 IN:         'in';
 
+
+MOD_:       'mod';
 MUT:        'mut';
 FN:          'fn';
 LET:        'let';

@@ -10,6 +10,8 @@ import (
 	arrayList "github.com/colegno/arraylist"
 )
 
+
+
 type IfInstruccion struct {
 	Condicion                   interfaces.Expresion
 	ListaInstruccionesPrincipal *arrayList.List
@@ -29,18 +31,21 @@ func NewIfInstruccion(condicion interfaces.Expresion, listaInstruccionesPrincipa
 
 func (ifInstr IfInstruccion) Get3D(ent *entorno.Entorno) string {
 
+	//entornoIf := entorno.NewEntorno("IF", ent)
+
 	ETIQUETA_SALIDA := Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
 	RESULTADO_FINAL := entorno.Result3D{}
 
 	expresionOperacion := ifInstr.Condicion.(expresion.Operacion)
-	expresionOperacion.EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
-	expresionOperacion.EtiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+	expresionOperacion.EtiquetaVerdadera = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+	expresionOperacion.EtiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
-	resultadoCondicion := ifInstr.Condicion.(expresion.Operacion).Obtener3D(ent)
+	resultadoCondicion := ifInstr.Condicion.(expresion.Operacion).Obtener3D(ent) // Operación lógica, resultado si es true o false pero unicamente su C3D
+	fmt.Printf("\nCONDICION: %v\n", resultadoCondicion)
 
 	RESULTADO_FINAL.Codigo += "/*****************INSTRUCCIÓN IF *****************/\n"
-	RESULTADO_FINAL.Codigo += resultadoCondicion.Codigo
+	RESULTADO_FINAL.Codigo += resultadoCondicion.Codigo // if(condicion)
 	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoCondicion.EtiquetaV)
 
 	RESULTADO_FINAL.Codigo += ifInstr.generarCodigoInstrucciones(ifInstr.ListaInstruccionesPrincipal, ent)
@@ -56,15 +61,15 @@ func (ifInstr IfInstruccion) Get3D(ent *entorno.Entorno) string {
 			IFNUEVO := ifInstr.ListaInstruccionesElse.GetValue(i).(IfInstruccion)
 
 			NUEVO_CONDICION := IFNUEVO.Condicion.(expresion.Operacion)
-			NUEVO_CONDICION.EtiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
-			NUEVO_CONDICION.EtiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+			NUEVO_CONDICION.EtiquetaVerdadera = Analizador.GeneradorGlobal.ObtenerEtiqueta()
+			NUEVO_CONDICION.EtiquetaFalsa = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 
 			resultadoNuevaCondicion := expresionOperacion.Obtener3D(ent)
 
 			RESULTADO_FINAL.Codigo += "\n\n"
 			RESULTADO_FINAL.Codigo += resultadoCondicion.Codigo
 
-			RESULTADO_FINAL.Codigo += fmt.Sprintf("%s: \n", resultadoNuevaCondicion.EtiquetaV)
+			RESULTADO_FINAL.Codigo += fmt.Sprintf("\n%s: \n", resultadoNuevaCondicion.EtiquetaV)
 
 			RESULTADO_FINAL.Codigo += ifInstr.generarCodigoInstrucciones(IFNUEVO.ListaInstruccionesPrincipal, ent)
 
@@ -95,7 +100,7 @@ func (ifInstr IfInstruccion) generarCodigoInstrucciones(lista *arrayList.List, e
 
 	for i := 0; i < lista.Len(); i++ {
 		INSTR := lista.GetValue(i)
-		CODIGO_SALIDA += INSTR.(interfaces.Instruccion).Get3D(ent)
+		CODIGO_SALIDA += INSTR.(interfaces.Instruccion).Get3D(ent) + "\n"
 	}
 
 	return CODIGO_SALIDA
