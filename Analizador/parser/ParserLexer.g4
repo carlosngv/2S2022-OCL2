@@ -55,7 +55,7 @@ STRINGTYPE: 'String';
 STRTYPE:    '&str';
 CHARTYPE:   'char';
 VOIDTYPE:   'void';
-BOOLTYPE:   'boolean';
+BOOLTYPE:   'bool';
 USIZETYPE:  'usize';
 
 

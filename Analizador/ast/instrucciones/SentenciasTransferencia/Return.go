@@ -45,12 +45,12 @@ func (r Return) Get3D(ent *entorno.Entorno) string {
 
 	if r.Salida == nil {
 		// * Como no retorna nada, asignamos un -1 en la posición del return
-		codigo +=  fmt.Sprintf("Stack[(int) %s] = -1;", temporalReturn)
+		codigo +=  fmt.Sprintf("Stack[(int) %s] = -1;\n", temporalReturn)
 		} else {
 			// * Extraemos el código de la expresión y se lo asignamos a la posición del return
 			expresionRetorno := validarExpresion(r.Salida, ent)
 			codigo += expresionRetorno.Codigo
-			codigo += fmt.Sprintf("Stack[(int) %s]= %s;", temporalReturn, expresionRetorno.Temporal)
+			codigo += fmt.Sprintf("Stack[(int) %s]= %s;\n", temporalReturn, expresionRetorno.Temporal)
 			codigo += "#RETURN \n"
 	}
 

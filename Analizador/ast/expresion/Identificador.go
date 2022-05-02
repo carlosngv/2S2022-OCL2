@@ -34,13 +34,19 @@ func (this Identificador) Obtener3D(ent *entorno.Entorno) entorno.Result3D {
 
 }
 
-func (this Identificador) ObtenerValor(ent *entorno.Entorno) entorno.Result3D {
+func (this Identificador) ObtenerValor(ent *entorno.Entorno) entorno.Result3D { // Obtener valor de identificador
+
+	/*
+		? Lo que hace esta función es retornar una instancia del struct result3D
+		? Dentro del result3D, viene el temporal que apunta al VALOR del identificador
+	*/
+
 
 	RESULTADO_FINAL := entorno.Result3D{}
 
 	temporal1 := Analizador.GeneradorGlobal.ObtenerTemporal()
 
-	RESULTADO_FINAL.Codigo += fmt.Sprintf("/* BUSCANDO UN IDENTIFICADOR  >>> %s <<<*/ \n", this.Identificador)
+	RESULTADO_FINAL.Codigo += fmt.Sprintf("/* BUSCANDO UN IDENTIFICADOR  >>> %s <<< (ID  Obtener Valor) */ \n", this.Identificador)
 	RESULTADO_FINAL.Codigo += fmt.Sprintf("%s = SP; \n", temporal1) // ? Temporal que almacena la dirección del entorno actual
 
 	idEncontrado := strings.ToLower(this.Identificador)
@@ -133,6 +139,22 @@ func (this Identificador) ObtenerDireccion(ent *entorno.Entorno) entorno.Result3
 
 		for key, simboloElement := range entActual.Tabla {
 			if key == idEncontrado {
+
+				/*
+					? Con base al simbolo encontrado gracias al string identificador, se obtiene
+					? todas sus propiedades del mismo dentro del entorno o los anteriores.
+
+					? Gracias a esta busqueda podemos acceder a la posición relativa del simbolo a encontrado.
+?
+					? Lo que devovlerá esta función es el result3D que contendrá:
+						* El temporal de la posición en donde se encuentra la variable o identificador que buscamos.
+						* Su codigo (Para la busqueda)
+						* Su tipo
+						* Como es un identificador, no tendrá etiquetas v o f
+						* No devolverá el valor, ya que solo se encarga de devolver el identifiacdor como tal
+
+				*/
+
 
 				SIMBOLO := simboloElement.(entorno.Simbolo)
 

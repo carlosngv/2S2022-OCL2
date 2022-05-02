@@ -86,6 +86,11 @@ func (this Operacion) Obtener3D(ent *entorno.Entorno) entorno.Result3D {
 		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
 	case "==":
 		return this.RELACIONAL(this.Op1, this.Op2, ent, this.Operador)
+	case "&&":
+		return this.LOGICA_AND(this.Op1, this.Op2, ent)
+	case "||":
+		return this.LOGICA_OR(this.Op1, this.Op2, ent)
+
 	}
 
 	return entorno.Result3D{}
@@ -528,19 +533,19 @@ func (this Operacion) RELACIONAL(Izq interfaces.Expresion, Der interfaces.Expres
 	// RELACIONAL ENTRE NUMEROS
 	if dominante != entorno.NULL {
 		etiquetaV := ""
-		fmt.Println(etiquetaV)
 		if this.EtiquetaVerdadera == "" {
 			etiquetaV = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		} else {
 			etiquetaV = this.EtiquetaVerdadera
 		}
+		fmt.Println("V (Relacional): " + etiquetaV)
 		etiquetaF := ""
-		fmt.Println(etiquetaF)
 		if this.EtiquetaFalsa == "" {
 			etiquetaF = Analizador.GeneradorGlobal.ObtenerEtiqueta()
 		} else {
-			etiquetaF = this.EtiquetaVerdadera
+			etiquetaF = this.EtiquetaFalsa
 		}
+		fmt.Println("F (Relacional): " + etiquetaF)
 
 		RESULTADO_FINAL.Codigo = resultadoIzq.Codigo + resultadoDer.Codigo + "\n"
 		RESULTADO_FINAL.Codigo += "if (" + resultadoIzq.Temporal +" "+ relacion + " " +  resultadoDer.Temporal + ") goto "+ etiquetaV + "; \n";

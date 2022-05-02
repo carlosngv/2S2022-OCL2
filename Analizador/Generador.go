@@ -32,6 +32,13 @@ func (g *Generador) ObtenerTemporalForzado() string {
 	return temporaln
 }
 
+func (g *Generador) ObtenerEtiquetaForzado() string {
+
+	temporalEtiqueta := "L" + fmt.Sprint(g.etiquetas)
+	g.etiquetas = g.etiquetas + 1
+	return temporalEtiqueta
+}
+
 func (g *Generador) ObtenerEtiqueta() string {
 
 	if g.Bloquear {
@@ -44,7 +51,9 @@ func (g *Generador) ObtenerEtiqueta() string {
 }
 
 func (g *Generador) Encabezado() string {
-	encabezado := `#include <stdio.h>
+	encabezado := `
+		#include <stdio.h>
+		#include <math.h>
 
 		float Heap[100000]; //Estructura heap
 		float Stack[100000]; //Estructura stack
@@ -53,7 +62,7 @@ func (g *Generador) Encabezado() string {
 
 	if g.temporales > 0 {
 
-		encabezado += "\nfloat "
+		encabezado += "\n float "
 		for i := 0; i < g.temporales; i++ {
 			if i%15 == 0 && i > 0 {
 				encabezado += "\n"

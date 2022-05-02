@@ -167,6 +167,7 @@ instruccion returns [interfaces.Instruccion instr]
   | sentencia_continue                       ';'                {$instr = $sentencia_continue.instr}
   | dec_arr                                  ';'                {$instr = $dec_arr.instr}
   | dec_objeto                               ';'                {$instr = $dec_objeto.instr}
+  | asignacion_objeto                        ';'                {$instr = $asignacion_objeto.instr}
 ;
 
 
@@ -504,7 +505,9 @@ acceso  returns [interfaces.Expresion expr]
 ;
 
 
-
+asignacion_objeto returns[interfaces.Instruccion instr]
+    : listaAccesos '=' expresion {$instr = asignacion.NewAsignacionObjeto($listaAccesos.lista, $expresion.expr )}
+;
 
 
 
@@ -524,7 +527,7 @@ expresion returns[interfaces.Expresion expr]
 ;
 
 expr_rel returns[interfaces.Expresion expr]
-    : opIz = expr_rel op=( MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL) opDe = expr_rel {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
+    : opIz = expr_rel op=( DIFERENTE | MAYORIGUAL | MENORIGUAL | MENOR | MAYOR | IGUAL_IGUAL ) opDe = expr_rel {$expr = expresion.NewOperacion($opIz.expr,$op.text,$opDe.expr,false, entorno.NULL)}
     | expr_arit  {$expr = $expr_arit.expr}
 ;
 

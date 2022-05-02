@@ -148,7 +148,7 @@ func (dec *Declaracion) Get3D(ent *entorno.Entorno) string {
 		if dec.Referencia {
 			simbolo.EsReferencia = true
 		}
-
+		simbolo.Valor = resultadoExpr
 		ent.AgregarSimbolo(simbolo.Identificador, simbolo)
 		ent.Tamanio = ent.Tamanio + 1
 
@@ -156,9 +156,12 @@ func (dec *Declaracion) Get3D(ent *entorno.Entorno) string {
 
 		for i := 0; i < dec.ListaVars.Len(); i++ {
 			VARIABLE := dec.ListaVars.GetValue(i).(expresion.Identificador)
+			nuevoValor := entorno.Result3D{}
+
 
 			simbolo := entorno.NewSimboloIdentificadorValor(0, 0, VARIABLE.Identificador, dec.TipoVariables)
 			simbolo.Posicion = ent.Tamanio
+			simbolo.Valor = nuevoValor
 
 			if dec.Referencia {
 				simbolo.EsReferencia = true

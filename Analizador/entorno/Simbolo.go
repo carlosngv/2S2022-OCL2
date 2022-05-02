@@ -21,6 +21,8 @@ type Simbolo struct {
 	Posicion     int
 
 	Temporal_REF string
+
+	Valor interface{}
 }
 
 /**
@@ -40,6 +42,7 @@ func NewSimboloIdentificador(linea int, columna int, identificador string) *Simb
 		EsFuncion:     false,
 		Posicion:     0,
 		EsReferencia:  false,
+		Valor: 	   nil,
 	}
 }
 
@@ -53,6 +56,7 @@ func NewSimboloIdentificadorValor(linea int, columna int, identificador string, 
 		Posicion:     0,
 		Tipo:          dato,
 		EsReferencia:  false,
+		Valor: 	   nil,
 	}
 	return e
 }
@@ -68,6 +72,7 @@ func NewSimboloObjeto(linea int, columna int, identificador string, tipoRet Tipo
 		Tipo:          tipoRet,
 		ListaParams:   nil,
 		EsReferencia:  false,
+		Valor: 	   nil,
 	}
 	return e
 }

@@ -14,7 +14,7 @@ type AsignacionObjeto struct {
 }
 
 func NewAsignacionObjeto(listaAccesos *arraylist.List, expr interfaces.Expresion) AsignacionObjeto {
-	return AsignacionObjeto{ListaAccesos: listaAccesos, Expr: expr}
+	return AsignacionObjeto{ListaAccesos: listaAccesos, Expr: expr, Valor: nil}
 }
 
 func NewAsignacionObjetoValor(listaAccesos *arraylist.List, valor interface{}) AsignacionObjeto {
